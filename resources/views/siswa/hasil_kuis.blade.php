@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Kuis: {{ $kuis->judul_kuis }}</title>
+
+    {{-- CSS dari CDN Bootstrap & Google Fonts --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .grade-box {
+            background-color: #e9ecef;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .grade-box .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container py-4 py-md-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('siswa.dashboard') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('siswa.tugas.index') }}">Tugas</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Hasil Kuis</li>
+            </ol>
+        </nav>
+
+        {{-- KARTU SKOR UTAMA --}}
+        <div class="card mb-4">
+            <div class="card-body text-center p-4">
+                <p class="text-muted mb-2">Skor Anda untuk Kuis</p>
+                <h2 class="h4 fw-bold mb-3">{{ $kuis->judul_kuis }}</h2>
+
+                {{-- MENGGUNAKAN $pengumpulan->nilai --}}
+                <div class="grade-box mb-3">
+                    <span class="score">{{ $pengumpulan->nilai ?? '0' }}</span>
+                </div>
+                
+                @if (($pengumpulan->nilai ?? 0) >= 75) {{-- Asumsi KKM adalah 75 --}}
+                    <div class="alert alert-success d-inline-block">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Selamat!</strong> Anda telah lulus.
+                    </div>
+                @else
+                    <div class="alert alert-warning d-inline-block">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Tetap semangat!</strong>
+                    </div>
+                @endif
+
+                <p class="text-muted mt-3">
+                    {{-- MENGGUNAKAN $pengumpulan->created_at --}}
+                    Diselesaikan pada: {{ $pengumpulan->created_at->isoFormat('dddd, D MMMM YYYY, HH:mm') }}
+                </p>
+            </div>
+        </div>
+
+        {{-- Menampilkan Catatan dari Guru jika ada --}}
+        @if(!empty($pengumpulan->catatan))
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0 fw-semibold"><i class="bi bi-chat-left-text-fill me-2"></i>Catatan dari Guru</h5></div>
+            <div class="card-body">
+                <blockquote class="blockquote mb-0">
+                    <p class="fst-italic">"{{ $pengumpulan->catatan }}"</p>
+                </blockquote>
+            </div>
+        </div>
+        @endif
+
+        <div class="text-center mt-4">
+            <a href="{{ route('siswa.tugas.index') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Tugas
+            </a>
+        </div>
+    </main>
+
+    {{-- JavaScript dari CDN Bootstrap --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Materi;
+use App\Models\Kelas; // Import model Kelas
+use App\Models\User;  // Import model User (untuk guru)
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage; // Untuk menghapus file jika perlu
+
+class MateriController extends Controller
+{
+    /**
+     * Menampilkan daftar materi.
+     */
+
+    /**
+     * Menyimpan materi baru.
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'tipe_materi' => ['required', 'string', Rule::in(['dokumen', 'video', 'link'])],
+            'kelas_id' => 'required|exists:kelas,id',
+            'user_id' => 'required|exists:users,id', // Harus guru
+            'file_upload' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,mov,avi|max:20480', // Max 20MB
+            'link_url' => 'nullable|url', // Untuk tipe materi 'link'
+        ]);
+
+        $filePath = null;
+
+        // Logika untuk menyimpan file atau URL tergantung tipe_materi
+        if ($request->tipe_materi === 'dokumen' || $request->tipe_materi === 'video') {
+            if ($request->hasFile('file_upload')) {
+                $filePath = $request->file('file_upload')->store('materi_files', 'public');
+            } else {
+                // Jika tipe dokumen/video tapi tidak ada file, bisa tambahkan validasi error
+                return back()->withErrors(['file_upload' => 'File harus diunggah untuk tipe materi ini.'])->withInput();
+            }
+        } elseif ($request->tipe_materi === 'link') {
+            if ($request->filled('link_url')) {
+                $filePath = $request->link_url;
+            } else {
+                return back()->withErrors(['link_url' => 'URL link harus diisi untuk tipe materi ini.'])->withInput();
+            }
+        }
+
+        Materi::create([
+            'judul' => $validatedData['judul'],
+            'deskripsi' => $validatedData['deskripsi'],
+            'tipe_materi' => $validatedData['tipe_materi'],
+            'file_path' => $filePath,
+            'user_id' => $validatedData['user_id'],
+            'kelas_id' => $validatedData['kelas_id'],
+        ]);
+
+        return redirect()->route('admin.materis.index')->with('success', 'Materi berhasil ditambahkan.');
+    }
+
+    /**
+     * Memperbarui materi yang ada.
+     */
+    public function update(Request $request, Materi $materi)
+    {
+        $validatedData = $request->validate([
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'tipe_materi' => ['required', 'string', Rule::in(['dokumen', 'video', 'link'])],
+            'kelas_id' => 'required|exists:kelas,id',
+            'user_id' => 'required|exists:users,id',
+            'file_upload' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,mov,avi|max:20480',
+            'link_url' => 'nullable|url',
+        ]);
+
+        $filePath = $materi->file_path; // Ambil path yang sudah ada
+
+        // Logika untuk handle file/URL saat update
+        if ($request->tipe_materi === 'dokumen' || $request->tipe_materi === 'video') {
+            if ($request->hasFile('file_upload')) {
+                // Hapus file lama jika ada
+                if ($materi->file_path && Storage::disk('public')->exists($materi->file_path)) {
+                    Storage::disk('public')->delete($materi->file_path);
+                }
+                $filePath = $request->file('file_upload')->store('materi_files', 'public');
+            } elseif (
+                ($request->tipe_materi === 'dokumen' || $request->tipe_materi === 'video') &&
+                !$request->filled('current_file_path') && // Cek jika pengguna menghapus input file yang sebelumnya terisi
+                !$request->hasFile('file_upload')
+            ) {
+                 // Jika tipe dokumen/video dan tidak ada file baru diunggah & file lama tidak dipertahankan
+                $filePath = null; // Set null jika tidak ada file
+                // Atau bisa juga memberikan error jika file wajib
+                // return back()->withErrors(['file_upload' => 'File harus diunggah untuk tipe materi ini.'])->withInput();
+            }
+        } elseif ($request->tipe_materi === 'link') {
+            // Jika sebelumnya ada file, hapus
+            if ($materi->file_path && Storage::disk('public')->exists($materi->file_path) && ($materi->tipe_materi === 'dokumen' || $materi->tipe_materi === 'video')) {
+                 Storage::disk('public')->delete($materi->file_path);
+            }
+            if ($request->filled('link_url')) {
+                $filePath = $request->link_url;
+            } else {
+                return back()->withErrors(['link_url' => 'URL link harus diisi untuk tipe materi ini.'])->withInput();
+            }
+        } else {
+             // Jika tipe materi berubah ke non-file/link, hapus file lama
+             if ($materi->file_path && Storage::disk('public')->exists($materi->file_path) && ($materi->tipe_materi === 'dokumen' || $materi->tipe_materi === 'video')) {
+                Storage::disk('public')->delete($materi->file_path);
+            }
+            $filePath = null;
+        }
+
+
+        $materi->update([
+            'judul' => $validatedData['judul'],
+            'deskripsi' => $validatedData['deskripsi'],
+            'tipe_materi' => $validatedData['tipe_materi'],
+            'file_path' => $filePath,
+            'user_id' => $validatedData['user_id'],
+            'kelas_id' => $validatedData['kelas_id'],
+        ]);
+
+        return redirect()->route('admin.materis.index')->with('success', 'Materi berhasil diperbarui.');
+    }
+
+    /**
+     * Menghapus materi.
+     */
+    public function destroy(Materi $materi)
+    {
+        // Hapus file terkait jika ada
+        if ($materi->file_path && Storage::disk('public')->exists($materi->file_path) && ($materi->tipe_materi === 'dokumen' || $materi->tipe_materi === 'video')) {
+            Storage::disk('public')->delete($materi->file_path);
+        }
+
+        $materi->delete();
+
+        return redirect()->route('admin.materis.index')->with('success', 'Materi berhasil dihapus.');
+    }
+}

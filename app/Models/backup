@@ -1,0 +1,105 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('materis', function (Blueprint $table) {
+            $table->id();
+
+            // Judul materi
+            $table->string('judul');
+
+            // Deskripsi singkat tentang materi
+            $table->text('deskripsi')->nullable();
+
+            // Tipe materi (dokumen, video, link, dll.)
+            $table->enum('tipe_materi', ['dokumen', 'video', 'link']);
+            
+            // Path atau URL ke file/resource materi
+            $table->string('file_path');
+
+            // Foreign key untuk menunjuk guru yang mengunggah
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+
+            // Foreign key untuk menunjuk kelas mana materi ini ditujukan
+            $table->foreignId('kelas_id')->constrained('kelas')->onDelete('cascade');
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('materis');
+    }
+};
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Materi extends Model
+{
+    use HasFactory;
+
+    /**
+     * Menentukan nama tabel secara eksplisit.
+     *
+     * @var string
+     */
+    protected $table = 'materis';
+
+    /**
+     * Atribut yang dapat diisi secara massal (mass assignable).
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'judul',
+        'deskripsi',
+        'tipe_materi',
+        'file_path',
+        'user_id',    // ID guru yang mengunggah
+        'kelas_id',   // ID kelas tempat materi ini berada
+    ];
+
+    /**
+     * Mendefinisikan relasi "belongsTo" ke model Kelas.
+     *
+     * Setiap materi dimiliki oleh satu kelas.
+     * Method ini memungkinkan Anda untuk mengakses data kelas dari sebuah materi,
+     * contoh: $materi->kelas->nama_kelas
+     */
+    public function kelas(): BelongsTo
+    {
+        return $this->belongsTo(Kelas::class);
+    }
+
+    /**
+     * Mendefinisikan relasi "belongsTo" ke model User.
+     *
+     * Setiap materi diunggah oleh satu user (guru).
+     * Method ini memungkinkan Anda untuk mengakses data guru dari sebuah materi,
+     * contoh: $materi->user->name
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
