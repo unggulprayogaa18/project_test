@@ -89,6 +89,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kelas', KelasController::class);
     Route::resource('mata-pelajaran', MataPelajaranController::class);
     Route::resource('materis', App\Http\Controllers\Admin\MateriController::class);
+    Route::get('/laporan/pengguna', [AdminController::class, 'laporanPengguna'])->name('laporan.pengguna');
 
 });
 
@@ -117,7 +118,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/konsultasi/{orangtua}', [ChatOrtuController::class, 'show'])->name('chat.show');
     Route::post('/konsultasi', [ChatOrtuController::class, 'store'])->name('chat.store');
     Route::post('/konsultasi/baca-semua', [ChatOrtuController::class, 'markAllRead'])->name('chat.markAllRead');
-}); 
+});
 
 
 // --- RUTE KHUSUS SISWA ---
@@ -129,13 +130,13 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('/tugas/{tugas}/hasil', [SiswaController::class, 'hasilTugas'])->name('tugas.hasil');
     Route::get('/presensi', [SiswaController::class, 'indexPresensi'])->name('presensi.index');
     Route::get('/tugas/{tugas}', [SiswaController::class, 'showTugas'])->name('tugas.show');
-      // Route untuk menampilkan halaman pengerjaan tugas (sudah ada)
+    // Route untuk menampilkan halaman pengerjaan tugas (sudah ada)
     Route::get('/tugas/{tugas}/kerjakan', [SiswaController::class, 'kerjakanTugas'])->name('tugas.kerjakan');
-    
+
     // !! TAMBAHKAN ROUTE BARU INI UNTUK MENGUMPULKAN TUGAS !!
     Route::post('/tugas/{tugas}/kumpulkan', [SiswaController::class, 'kumpulkanTugas'])->name('tugas.kumpulkan');
 
-    
+
     Route::get('/tugas', [SiswaController::class, 'indexTugas'])->name('tugas.index');
     Route::get('/materi', [SiswaController::class, 'indexMateri'])->name('materi.index');
     Route::get('/nilai', [SiswaController::class, 'indexNilai'])->name('nilai.index');
@@ -157,4 +158,5 @@ Route::middleware(['auth', 'role:orangtua'])->prefix('orangtua')->name('orangtua
     Route::get('/konsultasi', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/konsultasi/{guru}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/konsultasi', [ChatController::class, 'store'])->name('chat.store');
+    Route::delete('/chat/conversations/{conversation}/clear', [ChatController::class, 'clear'])->name('chat.clear');
 });

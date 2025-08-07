@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SIKS OTISTA</title>
+    <title>Laporan Pengguna - SIKS OTISTA</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    {{-- STYLE TETAP SAMA DENGAN TEMPLATE SEBELUMNYA --}}
     <style>
         :root {
             --biru-otista: #0A2B7A; --putih: #FFFFFF; --latar-utama: #f8f9fa;
             --teks-utama: #1e293b; --teks-sekunder: #64748b; --border-color: #e2e8f0; --sidebar-width: 260px;
-            --warna-siswa: #3b82f6; --warna-guru: #10b981; --warna-materi: #8b5cf6;
         }
         body { background-color: var(--latar-utama); font-family: 'Poppins', sans-serif; overflow-x: hidden; }
         .app-wrapper { display: flex; min-height: 100vh; }
@@ -59,19 +59,9 @@
         .sidebar-toggler { font-size: 1.5rem; display: none; color: var(--teks-sekunder); }
         .page-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); background-color: var(--putih); }
         .page-header h1 { font-weight: 700; font-size: 1.75rem; }
-        .summary-card {
-            border-radius: 0.75rem; background-color: var(--putih); transition: all 0.2s ease-in-out;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid var(--border-color);
-        }
-        .summary-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07); }
-        .summary-card .icon-bg {
-            height: 60px; width: 60px; border-radius: 0.5rem; display: flex;
-            align-items: center; justify-content: center; font-size: 1.75rem;
-        }
-        .card-siswa .icon-bg { background-color: rgba(59, 130, 246, 0.1); color: var(--warna-siswa); }
-        .card-guru .icon-bg { background-color: rgba(16, 185, 129, 0.1); color: var(--warna-guru); }
-        .card-materi .icon-bg { background-color: rgba(139, 92, 246, 0.1); color: var(--warna-materi); }
-        .summary-card .card-title { font-weight: 600; font-size: 1.5rem; }
+        .card { border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+        .table-custom thead th { background-color: #f8f9fa; color: var(--teks-utama); font-weight: 600; border-bottom: 2px solid var(--border-color); }
+        .table-custom td { vertical-align: middle; }
         @media (max-width: 991.98px) {
             .sidebar { transform: translateX(-100%); }
             body.sidebar-visible .sidebar { transform: translateX(0); box-shadow: 0 0 2rem rgba(0,0,0,0.15); }
@@ -92,41 +82,43 @@
             <nav class="sidebar-nav">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('admin.dashboard') }}">
-                            <i class="bi bi-grid-1x2-fill"></i><span>Beranda</span>
-                        </a>
+                        <a class="nav-link" href="{{ route('admin.dashboard') }}"><i class="bi bi-grid-1x2-fill"></i><span>Beranda</span></a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#submenu-kelola" role="button" aria-expanded="false">
-                            <i class="bi bi-stack"></i><span>Kelola Data</span>
+                      <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#submenu-kelola" role="button"
+                            aria-expanded="false" aria-controls="submenu-kelola">
+                            <i class="bi bi-stack"></i>
+                            <span>Kelola Data</span>
                         </a>
                         <div class="collapse" id="submenu-kelola">
                             <ul class="nav flex-column sidebar-submenu">
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.hal_matapelajaran') }}">Mata Pelajaran</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.hal_materi') }}">Materi</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.hal_kelas') }}">Kelas</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.users.index') }}">Pengguna</a></li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('admin.hal_matapelajaran') }}">Mata Pelajaran</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('admin.hal_materi') }}">Materi</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('admin.hal_kelas') }}">Kelas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('admin.users.index') }}">Pengguna</a>
+                                </li>
                             </ul>
                         </div>
                     </li>
-                    {{-- ===== BAGIAN YANG DIUBAH (Laporan menjadi accordion) ===== --}}
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#submenu-laporan" role="button" aria-expanded="false">
-                            <i class="bi bi-file-earmark-bar-graph-fill"></i><span>Laporan</span>
+                    {{-- MENU LAPORAN BARU --}}
+                    <li class="nav-item ">
+                        <a class="nav-link active" href="{{ route('admin.laporan.pengguna') }}">
+                            <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                            <span>Laporan</span>
                         </a>
-                        <div class="collapse" id="submenu-laporan">
-                             <ul class="nav flex-column sidebar-submenu">
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.laporan.pengguna') }}">Laporan Pengguna</a></li>
-                             </ul>
-                        </div>
                     </li>
-                    {{-- ========================================================== --}}
                     <li class="nav-item">
                     </li>
                 </ul>
             </nav>
-            {{-- ===== BAGIAN YANG DIPINDAHKAN (Profil Pengguna) ===== --}}
-            <div class="sidebar-footer">
+             <div class="sidebar-footer">
                 <div class="dropdown dropup">
                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle fs-2 text-secondary"></i>
@@ -141,77 +133,120 @@
                     </ul>
                 </div>
             </div>
-            {{-- ====================================================== --}}
         </aside>
 
         <div class="main-content">
             <header class="topbar">
                 <button class="btn border-0 sidebar-toggler"><i class="bi bi-list"></i></button>
-                {{-- KOSONGKAN BAGIAN INI KARENA PROFIL SUDAH PINDAH --}}
                 <div></div> 
             </header>
 
             <div class="page-header">
                 <div class="container-fluid">
-                    <h1>Dashboard</h1>
+                    <h1>Laporan Pengguna</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
+                            <li class="breadcrumb-item">Laporan</li>
+                            <li class="breadcrumb-item active" aria-current="page">Pengguna</li>
                         </ol>
                     </nav>
                 </div>
             </div>
 
             <main class="container-fluid p-4">
-                <div class="row g-4">
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card summary-card card-siswa">
-                            <div class="card-body d-flex align-items-center p-4">
-                                <div class="icon-bg me-4"><i class="bi bi-people-fill"></i></div>
-                                <div>
-                                    <h5 class="card-title">{{ $totalSiswa ?? 0 }}</h5>
-                                    <h6 class="card-subtitle text-muted">Total Siswa</h6>
-                                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <label for="roleFilter" class="form-label mb-0 fw-bold">Filter Role:</label>
+                                <select class="form-select form-select-sm" id="roleFilter" style="width: 200px;">
+                                    <option value="">Semua Role</option>
+                                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="guru" {{ request('role') == 'guru' ? 'selected' : '' }}>Guru</option>
+                                    <option value="siswa" {{ request('role') == 'siswa' ? 'selected' : '' }}>Siswa</option>
+                                </select>
                             </div>
+                            <button id="exportExcelBtn" class="btn btn-success">
+                                <i class="bi bi-file-earmark-excel-fill me-2"></i>Export ke Excel
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card summary-card card-guru">
-                            <div class="card-body d-flex align-items-center p-4">
-                                <div class="icon-bg me-4"><i class="bi bi-person-video3"></i></div>
-                                <div>
-                                    <h5 class="card-title">{{ $totalGuru ?? 0 }}</h5>
-                                    <h6 class="card-subtitle text-muted">Total Guru</h6>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card summary-card card-materi">
-                            <div class="card-body d-flex align-items-center p-4">
-                                <div class="icon-bg me-4"><i class="bi bi-book-half"></i></div>
-                                <div>
-                                    <h5 class="card-title">{{ $totalMateri ?? 0 }}</h5>
-                                    <h6 class="card-subtitle text-muted">Total Materi</h6>
-                                </div>
-                            </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            {{-- ID `userTable` digunakan oleh JavaScript untuk ekspor --}}
+                            <table class="table table-bordered table-hover table-custom" id="userTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nama</th>
+                                        <th>Email</th>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Nomor Induk</th>
+                                        <th>Kelas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($users as $key => $user)
+                                        <tr>
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ $user->nama }}</td>
+                                            <td>{{ $user->email }}</td>
+                                            <td>{{ $user->username }}</td>
+                                            <td>{{ ucfirst($user->role) }}</td>
+                                            <td>{{ $user->nomor_induk ?? '-' }}</td>
+                                            <td>{{ $user->kelas->nama_kelas ?? '-' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center py-4">Tidak ada data ditemukan.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
-
+    
+    {{-- Pustaka SheetJS (xlsx.js) untuk Export Excel --}}
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            // SCRIPT SIDEBAR
             const sidebarToggler = document.querySelector('.sidebar-toggler');
-            if (sidebarToggler) {
-                sidebarToggler.addEventListener('click', function () {
+            if(sidebarToggler) {
+                sidebarToggler.addEventListener('click', function() {
                     document.body.classList.toggle('sidebar-visible');
                 });
             }
+
+            // SCRIPT FILTER ROLE
+            const roleFilter = document.getElementById('roleFilter');
+            roleFilter.addEventListener('change', function() {
+                const selectedRole = this.value;
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('role', selectedRole);
+                window.location.href = currentUrl.toString();
+            });
+
+            // SCRIPT EXPORT EXCEL
+            const exportBtn = document.getElementById('exportExcelBtn');
+            exportBtn.addEventListener('click', function() {
+                const table = document.getElementById('userTable');
+                const wb = XLSX.utils.table_to_book(table, {sheet: "Laporan Pengguna"});
+                
+                // Buat nama file dinamis dengan tanggal
+                const today = new Date();
+                const dateStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                const fileName = `Laporan_Pengguna_${dateStr}.xlsx`;
+
+                XLSX.writeFile(wb, fileName);
+            });
         });
     </script>
 </body>

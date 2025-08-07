@@ -8,6 +8,7 @@ use App\Models\Tugas;
 use App\Models\Materi;
 use App\Models\Absensi;
 use App\Models\Conversation;
+use App\Models\Kelas;
 use App\Models\Kuis;
 use App\Models\MataPelajaran;
 use App\Models\Message;
@@ -19,9 +20,21 @@ class DashboardController extends Controller
 {
 
     //
-    public function admin()
+     public function admin()
     {
-        return view('admin.dashboard');
+        // 1. Hitung jumlah data dari masing-masing model
+        $totalSiswa = User::where('role', 'siswa')->count();
+        $totalGuru = User::where('role', 'guru')->count();
+        $totalMateri = Materi::count();
+        $totalKelas = Kelas::count(); // Opsional jika Anda ingin menambah kartu kelas
+
+        // 2. Kirim semua data hitungan ke view
+        return view('admin.dashboard', compact(
+            'totalSiswa', 
+            'totalGuru', 
+            'totalMateri',
+            'totalKelas'
+        ));
     }
 
    public function guru()

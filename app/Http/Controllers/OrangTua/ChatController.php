@@ -20,8 +20,8 @@ class ChatController extends Controller
         // Ambil semua user dengan role 'guru' dan lakukan paginasi
         // Misalnya, 10 guru per halaman. Anda bisa sesuaikan angka ini.
         $guruList = User::where('role', Role::GURU)
-                        ->orderBy('nama')
-                        ->paginate(10); // <-- UBAH DI SINI
+            ->orderBy('nama')
+            ->paginate(10); // <-- UBAH DI SINI
 
         return view('orangtua.chat.index', compact('guruList'));
     }
@@ -36,10 +36,10 @@ class ChatController extends Controller
         // Cari percakapan yang sudah ada antara orang tua dan guru ini
         $conversation = Conversation::where(function ($query) use ($orangTua, $guru) {
             $query->where('participant_one_id', $orangTua->id)
-                  ->where('participant_two_id', $guru->id);
+                ->where('participant_two_id', $guru->id);
         })->orWhere(function ($query) use ($orangTua, $guru) {
             $query->where('participant_one_id', $guru->id)
-                  ->where('participant_two_id', $orangTua->id);
+                ->where('participant_two_id', $orangTua->id);
         })->first();
 
         // Jika belum ada percakapan, buat yang baru
@@ -79,5 +79,21 @@ class ChatController extends Controller
         ]);
 
         return back(); // Kembali ke halaman chat sebelumnya
+    }/**
+     * [BARU] Menghapus semua pesan dalam sebuah percakapan.
+     */
+    public function clear(Conversation $conversation)
+    {
+        // Pastikan pengguna yang login adalah bagian dari percakapan ini (Otorisasi)
+        if ($conversation->participant_one_id != Auth::id() && $conversation->participant_two_id != Auth::id()) {
+            // Jika bukan, kembalikan error 403 (Forbidden)
+            abort(403, 'Akses ditolak.');
+        }
+
+        // Hapus semua pesan yang terkait dengan percakapan ini
+        $conversation->messages()->delete();
+
+        // Kembali ke halaman chat dengan pesan sukses
+        return back()->with('success', 'Riwayat chat berhasil dibersihkan.');
     }
 }

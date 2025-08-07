@@ -228,7 +228,6 @@
                     <i class="bi bi-person-circle ms-2 fs-4"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end text-small shadow">
-                    <li><a class="dropdown-item" href="#">Profil Saya</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>

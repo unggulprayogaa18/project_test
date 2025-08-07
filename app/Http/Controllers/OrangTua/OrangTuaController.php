@@ -7,18 +7,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log; // <-- Pastikan ini ada
+use Illuminate\Support\Facades\Log;
 
 class OrangTuaController extends Controller
 {
     /**
      * Menampilkan dashboard utama untuk orang tua.
-     * Dashboard akan menampilkan informasi ringkas tentang anak mereka.
      */
     public function dashboard()
     {
         $orangTua = Auth::user();
-        // Cari data anak secara eksplisit menggunakan model User
         $anak = User::where('orang_tua_id', $orangTua->id)->with('kelas')->first();
 
         if (!$anak) {
@@ -30,18 +28,14 @@ class OrangTuaController extends Controller
 
     /**
      * Menampilkan halaman detail perkembangan anak.
-     * Halaman ini bisa berisi nilai, absensi, dll.
      */
     public function lihatAnak()
     {
         $orangTua = Auth::user();
-
-        // Ambil ID orang tua yang sedang login
         $orangTuaId = $orangTua->id;
 
-        // Cari data anak menggunakan kueri statis pada model User
+        // Cari data anak dengan semua relasi yang dibutuhkan
         $anak = User::where('orang_tua_id', $orangTuaId)->with([
-            'kelas',
             'kelas.waliKelas',
             'nilai.mataPelajaran',
             'nilai.guru',
@@ -51,99 +45,47 @@ class OrangTuaController extends Controller
         ])->first();
 
         if (!$anak) {
-            Log::warning('Dashboard Orang Tua: Data anak tidak ditemukan.', ['orang_tua_id' => $orangTua->id]);
             abort(404, 'Data siswa tidak ditemukan.');
         }
 
-        Log::debug('Dashboard Orang Tua: Anak Ditemukan', ['anak_id' => $anak->id, 'anak_nama' => $anak->nama]);
-
-        // --- Logika Tambahan untuk Ringkasan Absensi ---
-        $rekapAbsensi = $anak->presensi
-            ->groupBy('status')
-            ->map->count();
-
-        $tanggalMulai = Carbon::now()->subDays(30)->toDateString();
+        // --- LOGIKA ABSENSI YANG DIPERBAIKI ---
+        // 1. Ambil data presensi dalam 30 hari terakhir TERLEBIH DAHULU
         $presensiTerbaru = $anak->presensi()
-            ->whereDate('tanggal', '>=', $tanggalMulai)
+            ->where('tanggal', '>=', Carbon::now()->subDays(30))
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        // --- Logika Tambahan untuk Ringkasan Nilai Umum ---
+        // 2. BUAT REKAPITULASI BERDASARKAN DATA YANG SUDAH DIFILTER (CASE-INSENSITIVE)
+        $rekapAbsensi = $presensiTerbaru->groupBy(function($item) {
+            return strtolower($item->status); // Mengelompokkan berdasarkan status huruf kecil
+        })->map->count();
+        // --- AKHIR PERBAIKAN ---
+
+        // --- Logika untuk Ringkasan Nilai Akademik ---
         $rataRataNilaiPerMapel = $anak->nilai
             ->groupBy('mataPelajaran.nama_mapel')
-            ->map(function ($items) {
-                return $items->avg('nilai');
-            });
+            ->map(fn ($items) => $items->avg('nilai'));
 
         $nilaiTerbaru = $anak->nilai()->latest()->take(5)->get();
 
-
-        // --- Logika Baru untuk Rata-rata Nilai Pengumpulan Tugas dan Grade ---
-        $totalNilaiTugas = 0;
-        $jumlahTugasDinilai = 0;
-        $persentaseNilaiTugas = 0;
-        $gradeTugas = 'N/A'; // Default grade
-
-        // Dapatkan SEMUA pengumpulan tugas untuk anak ini
-        $allPengumpulanTugas = $anak->pengumpulanTugas;
-        Log::debug('Dashboard Orang Tua: Semua Pengumpulan Tugas', ['count' => $allPengumpulanTugas->count(), 'data' => $allPengumpulanTugas->toArray()]);
-
-
-        // Filter pengumpulan tugas yang sudah dinilai dan punya nilai
-        $dinilaiTugas = $allPengumpulanTugas->filter(function ($pengumpulan) {
-            $isDinilai = $pengumpulan->status == 'dikerjakan';
-            $hasNilai = !is_null($pengumpulan->nilai);
-            Log::debug('Dashboard Orang Tua: Filtering Pengumpulan Tugas', [
-                'tugas_id' => $pengumpulan->id,
-                'status' => $pengumpulan->status,
-                'nilai' => $pengumpulan->nilai,
-                'is_dinilai_status' => $isDinilai,
-                'has_nilai' => $hasNilai,
-                'keep_this_task' => $isDinilai && $hasNilai
-            ]);
-            return $isDinilai && $hasNilai;
-        });
-
-        Log::debug('Dashboard Orang Tua: Pengumpulan Tugas yang Dinilai (Filtered)', ['count' => $dinilaiTugas->count(), 'data' => $dinilaiTugas->toArray()]);
-
-
-        if ($dinilaiTugas->isNotEmpty()) {
-            $totalNilaiTugas = $dinilaiTugas->sum('nilai');
-            $jumlahTugasDinilai = $dinilaiTugas->count();
-
-            // Asumsi nilai maksimal per tugas adalah 100.
-            // Persentase adalah rata-rata nilai dari tugas yang dinilai.
-            if ($jumlahTugasDinilai > 0) {
-                $persentaseNilaiTugas = ($totalNilaiTugas / $jumlahTugasDinilai);
-            }
-
-            Log::debug('Dashboard Orang Tua: Perhitungan Nilai Tugas', [
-                'total_nilai_tugas' => $totalNilaiTugas,
-                'jumlah_tugas_dinilai' => $jumlahTugasDinilai,
-                'persentase_nilai_tugas' => $persentaseNilaiTugas
-            ]);
-
-            // Tentukan Grade
-            if ($persentaseNilaiTugas >= 90) {
-                $gradeTugas = 'A';
-            } elseif ($persentaseNilaiTugas >= 80) {
-                $gradeTugas = 'B';
-            } elseif ($persentaseNilaiTugas >= 70) {
-                $gradeTugas = 'C';
-            } elseif ($persentaseNilaiTugas >= 60) {
-                $gradeTugas = 'D';
-            } else {
-                $gradeTugas = 'E';
-            }
-            Log::debug('Dashboard Orang Tua: Grade Tugas Ditetapkan', ['grade' => $gradeTugas]);
-
-        } else {
-            Log::debug('Dashboard Orang Tua: Tidak ada tugas yang dinilai untuk perhitungan grade.');
+        // --- Logika untuk Rata-rata Nilai Tugas dan Grade ---
+        $dinilaiTugas = $anak->pengumpulanTugas->filter(fn ($p) => !is_null($p->nilai));
+        
+        $jumlahTugasDinilai = $dinilaiTugas->count();
+        $persentaseNilaiTugas = $jumlahTugasDinilai > 0 ? $dinilaiTugas->avg('nilai') : 0;
+        
+        // Tentukan Grade
+        $gradeTugas = 'N/A';
+        if ($jumlahTugasDinilai > 0) {
+            if ($persentaseNilaiTugas >= 90) $gradeTugas = 'A';
+            elseif ($persentaseNilaiTugas >= 80) $gradeTugas = 'B';
+            elseif ($persentaseNilaiTugas >= 70) $gradeTugas = 'C';
+            elseif ($persentaseNilaiTugas >= 60) $gradeTugas = 'D';
+            else $gradeTugas = 'E';
         }
 
-        // Ambil 5 tugas terbaru dari SEMUA pengumpulan tugas untuk tabel di bawah (tanpa filter status)
+        // Ambil 5 tugas terbaru untuk ditampilkan di tabel
         $tugasTerbaru = $anak->pengumpulanTugas()->with('tugas.mataPelajaran')->latest()->take(5)->get();
-
 
         return view('orangtua.anak.show', compact(
             'orangTua',
@@ -153,7 +95,6 @@ class OrangTuaController extends Controller
             'rataRataNilaiPerMapel',
             'nilaiTerbaru',
             'tugasTerbaru',
-            'totalNilaiTugas',
             'persentaseNilaiTugas',
             'gradeTugas',
             'jumlahTugasDinilai'

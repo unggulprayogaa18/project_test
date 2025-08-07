@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - LMS SMK Otista Bandung</title>
+    <title>Login - SIKS Otto Iskandar Dinata</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -15,16 +15,11 @@
     <style>
         :root {
             --biru-otista: #0A2B7A;
-            --kuning-pucat: #FDEEAA;
             --putih: #FFFFFF;
-            --latar-utama: #f8f9fa;
+            --latar-utama: #f0f2f5; /* Warna latar lebih soft */
             --teks-utama: #212529;
             --teks-sekunder: #6c757d;
             --border-color: #dee2e6;
-        }
-
-        .h-100 {
-            height: 100vh !important;
         }
 
         body,
@@ -34,52 +29,72 @@
             background-color: var(--latar-utama);
         }
 
+        /* Wrapper utama untuk menengahkan konten */
         .login-wrapper {
             min-height: 100vh;
-        }
-
-        .login-branding {
-            background: linear-gradient(45deg, var(--biru-otista), #0d3a9e);
-            color: var(--putih);
-            padding: 2rem;
-        }
-
-        .login-branding .logo-img {
-            width: 120px;
-            margin-bottom: 1.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .login-branding h1 {
-            font-weight: 700;
-            font-size: 2.25rem;
-        }
-
-        .login-branding p {
-            font-size: 1.1rem;
-            max-width: 400px;
-            text-align: center;
-            opacity: 0.9;
-        }
-
-        .login-form-panel {
-            padding: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1.5rem;
         }
 
-        .login-form-container {
+        /* Kontainer untuk form login */
+        .login-container {
             max-width: 450px;
             width: 100%;
         }
 
-        .login-form-container h2 {
+        /* Header yang berisi logo dan nama sistem */
+        .login-header {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Logo di tengah untuk estetika */
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .login-header .logo-img {
+            width: 60px; /* Ukuran logo disesuaikan */
+            height: 60px;
+        }
+
+        .login-header .app-name-container {
+           margin-left: 1rem;
+           text-align: left;
+        }
+
+        .login-header h1 {
+            font-size: 1.75rem;
             font-weight: 700;
+            color: var(--biru-otista);
+            margin-bottom: 0;
+        }
+
+        .login-header p {
+            font-size: 1rem;
+            color: var(--teks-sekunder);
+            margin-bottom: 0;
+        }
+
+        /* Kartu Form Login */
+        .login-card {
+            background-color: var(--putih);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+
+        .login-card-title {
+            font-weight: 600;
             color: var(--teks-utama);
+        }
+
+        /* Ikon Belajar */
+        .login-card-title .bi-mortarboard-fill {
+            color: var(--biru-otista);
+            vertical-align: middle;
+            font-size: 1.5rem;
         }
 
         .form-control {
@@ -107,77 +122,78 @@
             background-color: #082261;
             border-color: #082261;
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(10, 43, 122, 0.3);
         }
 
         .input-group-text {
             background-color: var(--putih);
-            border-left: none;
+            border-left: 0;
             cursor: pointer;
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+        .form-control:not(:last-child) {
+            border-right: 0;
         }
     </style>
 </head>
 
 <body>
     <div class="login-wrapper">
-        <div class="container-fluid g-0 h-100">
-            <div class="row g-0 h-100">
-                <div
-                    class="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center login-branding">
-                    <img src="{{ asset('images/bg.png') }}" class="logo-img" alt="Logo Sekolah">
-                    <h1>SMKS Otto Iskandar Dinata Bandung</h1>
-                    <p class="mt-2">Learning Management System untuk mendukung proses belajar mengajar yang lebih
-                        efektif.</p>
-                </div>
+        <div class="login-container">
 
-                <div class="col-lg-6 login-form-panel">
-                    <div class="login-form-container">
-                        <div class="text-center mb-4 d-lg-none">
-                            <img src="{{ asset('images/bg.png') }}" width="80px" alt="Logo Sekolah" class="mb-3">
-                        </div>
-                        <h2 class="text-center text-lg-start">Selamat Datang!</h2>
-                        <p class="text-muted text-center text-lg-start mb-4">Silakan masuk untuk melanjutkan.</p>
-
-                        @if ($errors->any())
-                            <div class="alert alert-danger" role="alert">
-                                Username atau password yang Anda masukkan salah.
-                            </div>
-                        @endif
-
-                        <form method="POST" action="{{ route('login') }}">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="username" class="form-label fw-semibold">Username</label>
-                                <input type="text" class="form-control" id="username" name="username"
-                                    value="{{ old('username') }}" placeholder="Masukkan username" required autofocus>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="password" class="form-label fw-semibold">Password</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" id="password" name="password"
-                                        placeholder="Masukkan password" required>
-                                    <span class="input-group-text" id="togglePassword">
-                                        <i class="bi bi-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Masuk</button>
-                            </div>
-                        </form>
-
-                        <div class="text-center mt-5">
-                            <p class="text-muted">&copy; {{ date('Y') }} LMS SMK Otista Bandung</p>
-                        </div>
-                    </div>
+            <div class="login-header">
+                <img src="{{ asset('images/bg.png') }}" class="logo-img" alt="Logo Sekolah" style="border-radius: 30px;">
+                <div class="app-name-container">
+                    <h1>SIKS OTISTA</h1>
+                    <p>SMK Otto Iskandar Dinata</p>
                 </div>
             </div>
+
+            <div class="login-card">
+                <h2 class="text-center mb-2 login-card-title">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    Login Akun
+                </h2>
+                <p class="text-muted text-center mb-4">Silakan masuk untuk melanjutkan.</p>
+
+                @if ($errors->any())
+                    <div class="alert alert-danger" role="alert">
+                        Username atau password yang Anda masukkan salah.
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            value="{{ old('username') }}" placeholder="Masukkan username" required autofocus>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Masukkan password" required>
+                            <span class="input-group-text" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Masuk</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">&copy; {{ date('Y') }} LMS SMK Otista Bandung</p>
+            </div>
+
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
@@ -194,5 +210,4 @@
         }
     </script>
 </body>
-
 </html>

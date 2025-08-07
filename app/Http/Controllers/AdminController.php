@@ -99,7 +99,22 @@ class AdminController extends Controller
         return view('guru.hal_ujian_kuis'); // Buat view-nya nanti
     }
 
+  public function laporanPengguna(Request $request)
+    {
+        // Memulai query builder
+        $query = User::query()->with('kelas'); // Eager load relasi kelas
 
+        // Menerapkan filter jika ada
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+        
+        // Mengambil semua data yang sudah difilter (tanpa paginasi)
+        $users = $query->orderBy('nama', 'asc')->get();
+
+        // Mengirim data ke view
+        return view('admin.laporan.pengguna', compact('users'));
+    }
     // Fungsi-fungsi lain seperti store, edit, update, destroy akan diisi nanti
     // ...
 }

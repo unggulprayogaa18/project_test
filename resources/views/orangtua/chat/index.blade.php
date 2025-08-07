@@ -12,33 +12,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        /* [ BARU ] Variabel Warna yang Didesain Ulang untuk Tampilan Modern */
         :root {
-            --primary-color: #0d6efd; /* Bootstrap Blue */
-            --secondary-color: #6c757d; /* Bootstrap Gray */
-            --success-color: #198754; /* Bootstrap Green */
-            --light-bg: #f8f9fa; /* Light background */
-            --white-bg: #ffffff; /* White background */
-            --border-color: #e0e0e0; /* Light border */
-            --text-dark: #212529; /* Dark text */
-            --text-muted: #6c757d; /* Muted text */
-            --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            --list-item-hover-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --primary-color: #4A90E2;      /* Biru yang lebih lembut */
+            --primary-light: #EAF2FB;     /* Latar belakang biru muda */
+            --secondary-color: #50E3C2;   /* Aksen Mint Green (opsional) */
+            --text-dark: #333;            /* Hitam yang tidak terlalu pekat */
+            --text-muted: #888;           /* Abu-abu yang lebih jelas */
+            --light-bg: #F7F9FC;          /* Latar belakang utama yang lebih bersih */
+            --white-bg: #FFFFFF;
+            --border-color: #EAEAEA;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            --item-hover-shadow: 0 8px 25px rgba(74, 144, 226, 0.2);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--light-bg);
             color: var(--text-dark);
-            min-height: 100vh; /* Agar body selalu setinggi viewport */
-            display: flex;
-            flex-direction: column; /* Untuk sticky footer/main content */
         }
 
+        /* [ BARU ] Navbar dengan gaya lebih minimalis */
         .navbar {
-            background-color: var(--white-bg) !important;
+            background-color: var(--white-bg);
             border-bottom: 1px solid var(--border-color);
-            padding-top: 0.8rem;
-            padding-bottom: 0.8rem;
         }
 
         .navbar-brand {
@@ -48,282 +45,231 @@
 
         .navbar .btn-outline-secondary {
             border-color: var(--border-color);
-            color: var(--secondary-color);
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
+            color: var(--text-muted);
             border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
         .navbar .btn-outline-secondary:hover {
-            background-color: var(--secondary-color);
-            color: var(--white-bg);
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-color: var(--primary-light);
         }
 
-        main {
-            flex-grow: 1; /* Agar main content mengisi sisa ruang */
-        }
-
+        /* [ BARU ] Kartu utama dengan gaya yang lebih menonjol */
         .card {
             border: none;
-            border-radius: 1rem; /* Sudut lebih membulat */
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); /* Shadow lebih menonjol */
-            overflow: hidden; /* Penting untuk border-radius */
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-top: 1rem;
         }
 
+        /* [ BARU ] Header kartu dengan gradien halus */
         .card-header {
-            background-color: var(--white-bg);
+            background: linear-gradient(135deg, var(--white-bg) 0%, var(--primary-light) 100%);
             border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 2rem; /* Padding lebih besar */
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem; /* Jarak antar elemen di header */
+            padding: 2rem 2.5rem;
         }
 
         .card-header h1 {
             font-weight: 700;
             color: var(--primary-color);
-            font-size: 1.75rem; /* Ukuran h1 */
-            margin-bottom: 0;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
         }
 
-        .card-header p {
+        /* [ BARU ] Input pencarian yang lebih stylish */
+        .search-box {
+            position: relative;
+            margin-top: 1.5rem;
+        }
+        .search-box .form-control {
+            border-radius: 0.75rem;
+            padding-left: 3rem;
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+            border: 1px solid var(--border-color);
+            box-shadow: none !important;
+            transition: border-color 0.3s ease;
+        }
+        .search-box .form-control:focus {
+            border-color: var(--primary-color);
+        }
+        .search-box .bi-search {
+            position: absolute;
+            top: 50%;
+            left: 1.25rem;
+            transform: translateY(-50%);
             color: var(--text-muted);
-            margin-bottom: 0;
-            font-size: 0.95rem;
+            pointer-events: none; /* Agar tidak bisa diklik */
         }
-
-        /* Search Input Styling */
-        .input-group {
-            margin-top: 1.5rem; /* Jarak dari deskripsi */
-            margin-bottom: 1rem;
-        }
-
-        .input-group-text {
-            background-color: var(--white-bg);
-            border-right: none;
-            border-color: var(--border-color);
-            border-radius: 0.5rem 0 0 0.5rem; /* Membulatkan hanya di kiri */
-            padding: 0.75rem 1rem;
-            color: var(--secondary-color);
-        }
-
-        .form-control {
-            border-left: none;
-            border-color: var(--border-color);
-            border-radius: 0 0.5rem 0.5rem 0; /* Membulatkan hanya di kanan */
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            box-shadow: none !important; /* Hapus shadow default focus */
-        }
-        .form-control:focus {
-            border-color: var(--primary-color); /* Warna border saat focus */
-        }
-
 
         .card-body {
-            padding: 2rem; /* Padding lebih besar */
+            padding: 1.5rem 2.5rem 2.5rem;
         }
 
-        .list-group {
-            --bs-list-group-border-color: transparent; /* Hapus border default list-group */
-        }
-
+        /* [ BARU ] Item daftar guru dengan efek hover yang elegan */
         .list-group-item-action {
-            background-color: var(--white-bg);
-            border-radius: 0.75rem; /* Membulatkan setiap item */
-            margin-bottom: 0.75rem; /* Jarak antar item */
-            transition: all 0.25s ease-in-out;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Shadow ringan untuk setiap item */
-            padding: 1.25rem 1.5rem; /* Padding lebih besar di dalam item */
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 1rem 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .list-group-item-action:hover {
-            background-color: var(--white-bg); /* Pastikan warna tetap putih saat hover */
-            transform: translateY(-5px); /* Efek angkat */
-            box-shadow: var(--list-item-hover-shadow); /* Shadow lebih kuat saat hover */
-            border-color: transparent; /* Tetap tanpa border */
+            transform: translateY(-5px);
+            box-shadow: var(--item-hover-shadow);
+            border-color: var(--primary-color);
+            background-color: var(--white-bg); /* Jaga agar background tetap putih */
         }
-
-        .list-group-item-action .bi-person-circle {
-            font-size: 3rem; /* Ikon profil lebih besar */
-            margin-right: 1.25rem;
-            color: var(--primary-color); /* Warna ikon profil */
-        }
-        .list-group-item-action .bi-chevron-right {
-            font-size: 1.25rem;
-            color: var(--secondary-color);
+        
+        /* [ BARU ] Avatar ikon guru yang lebih menarik */
+        .guru-avatar {
+            font-size: 1.75rem;
+            width: 50px;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            margin-right: 1rem;
         }
 
         .list-group-item-action h6 {
-            font-size: 1.1rem; /* Ukuran nama guru */
             font-weight: 600;
             color: var(--text-dark);
-            margin-bottom: 0.2rem; /* Jarak dengan "Guru" */
+        }
+        .list-group-item-action small {
+            color: var(--text-muted);
+        }
+        .list-group-item-action .bi-chevron-right {
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+        .list-group-item-action:hover .bi-chevron-right {
+            transform: translateX(5px);
+            color: var(--primary-color);
         }
 
-        .list-group-item-action small {
-            font-size: 0.85rem;
+        /* [ BARU ] Styling untuk pesan 'empty state' yang lebih baik */
+        #emptyStateMessage {
+            display: none; /* Sembunyikan secara default, diatur oleh JS */
+            text-align: center;
+            padding: 3rem 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+        }
+        #emptyStateMessage .bi {
+            font-size: 3rem;
+            color: var(--primary-color);
+            opacity: 0.6;
+        }
+        #emptyStateMessage p {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
             color: var(--text-muted);
         }
 
-        /* Empty state styling */
-        .no-guru-message { /* Gunakan kelas ini untuk pesan "Tidak ada guru" */
-            padding: 3rem !important;
-            background-color: var(--white-bg);
-            border-radius: 0.75rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            text-align: center; /* Pastikan teks di tengah */
-            /* Defaultnya display: none; akan diatur oleh JS jika perlu */
-        }
-        .no-guru-message i {
-            font-size: 4rem !important;
-            color: var(--secondary-color);
-            margin-bottom: 1rem;
-        }
-
-        /* Pagination styling */
+        /* [ BARU ] Pagination yang disesuaikan dengan tema */
         .pagination-container {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: center;
+            margin-top: 2rem;
         }
-        .pagination .page-item .page-link {
-            border-radius: 0.5rem;
+        .pagination .page-link {
+            border: none;
+            border-radius: 0.5rem !important; /* Override Bootstrap */
             margin: 0 0.25rem;
-            border-color: var(--border-color);
             color: var(--primary-color);
-            transition: all 0.2s ease;
+            background-color: var(--primary-light);
+            font-weight: 500;
         }
         .pagination .page-item.active .page-link {
             background-color: var(--primary-color);
-            border-color: var(--primary-color);
             color: var(--white-bg);
-        }
-        .pagination .page-item .page-link:hover {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: var(--white-bg);
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
         }
         .pagination .page-item.disabled .page-link {
-            color: var(--text-muted);
-            pointer-events: none;
-            background-color: var(--light-bg);
+            background-color: #F0F0F0;
+            color: #BBB;
         }
-
-        /* Responsive Adjustments */
+        .pagination .page-link:hover {
+            background-color: var(--primary-color);
+            color: var(--white-bg);
+        }
+        
+        /* Penyesuaian Responsif */
         @media (max-width: 768px) {
-            .navbar {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            .navbar .btn-outline-secondary {
-                font-size: 0.85rem;
-                padding: 0.4rem 0.8rem;
-            }
-            main.container {
-                padding: 1.5rem 1rem; /* Padding lebih kecil di mobile */
-            }
-            .card-header {
-                padding: 1.25rem 1.5rem;
-            }
-            .card-header h1 {
-                font-size: 1.5rem;
-            }
-            .card-header p {
-                font-size: 0.85rem;
-            }
-            .input-group-text, .form-control {
-                padding: 0.6rem 0.8rem;
-                font-size: 0.95rem;
-            }
-            .card-body {
-                padding: 1.5rem;
-            }
-            .list-group-item-action {
-                padding: 1rem 1.25rem;
-            }
-            .list-group-item-action .bi-person-circle {
-                font-size: 2.5rem;
-                margin-right: 1rem;
-            }
-            .list-group-item-action h6 {
-                font-size: 1rem;
-            }
-            .list-group-item-action small {
-                font-size: 0.8rem;
-            }
-            .no-guru-message {
-                padding: 2rem !important;
-            }
-            .no-guru-message i {
-                font-size: 3rem !important;
-            }
+            .card-header, .card-body { padding: 1.5rem; }
+            .card-header h1 { font-size: 1.5rem; }
         }
 
-        @media (max-width: 576px) {
-            .navbar-brand {
-                font-size: 1.1rem !important; /* Ukuran font brand di mobile */
-            }
-            .card-header h1 {
-                font-size: 1.35rem;
-            }
-        }
     </style>
 </head>
 
 <body>
     {{-- Navbar --}}
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('orangtua.dashboard') }}">Portal Orang Tua</a>
-            <div class="ms-auto">
-                <a href="{{ route('orangtua.dashboard') }}" class="btn btn-outline-secondary">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-person-hearts me-2"></i>Portal Orang Tua
+            </a>
+          <a href="{{ route('orangtua.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
                 </a>
-            </div>
         </div>
     </nav>
 
-    <main class="container py-4 py-md-5">
+    <main class="container py-4">
         <div class="card">
-            <div class="card-header bg-white border-0">
-                <h1 class="h4 fw-bold">Mulai Konsultasi</h1>
+            <div class="card-header">
+                <h1>Mulai Konsultasi</h1>
                 <p class="text-muted">Pilih guru untuk memulai atau melanjutkan percakapan.</p>
                 
-                {{-- Fitur Pencarian Guru --}}
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Cari nama guru..." aria-label="Cari guru">
+                {{-- [BARU] Struktur input pencarian yang lebih baik --}}
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Cari nama guru...">
                 </div>
             </div>
+
             <div class="card-body">
-                <div class="list-group" id="guruListContainer">
-                    {{-- Loop untuk menampilkan daftar guru --}}
+                <div class="list-group list-group-flush" id="guruListContainer">
+                    {{-- Loop untuk menampilkan daftar guru dari backend --}}
                     @forelse ($guruList as $guru)
-                        <a href="{{ route('orangtua.chat.show', $guru->id) }}"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center guru-item">
+                        <a href="{{ route('orangtua.chat.show', $guru->id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center guru-item">
                             <div class="d-flex align-items-center">
-                                <i class="bi bi-person-circle me-3 text-primary"></i>
+                                <div class="guru-avatar">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
                                 <div>
-                                    <h6 class="mb-0 fw-semibold guru-nama">{{ $guru->nama }}</h6>
-                                    <small class="text-muted">Guru</small>
+                                    <h6 class="mb-0 guru-nama">{{ $guru->nama }}</h6>
+                                    <small>Guru</small>
                                 </div>
                             </div>
-                            <i class="bi bi-chevron-right text-muted"></i>
+                            <i class="bi bi-chevron-right"></i>
                         </a>
                     @empty
-                        {{-- Pesan ini akan disembunyikan/ditampilkan oleh JS jika ada pencarian --}}
-                        <div class="no-guru-message" id="noGuruFoundMessage">
-                            <i class="bi bi-person-x-fill"></i>
-                            <p class="mt-3 text-muted">Tidak ada data guru yang tersedia saat ini.</p>
-                        </div>
+                        {{-- Data awal kosong. JS akan menangani ini. --}}
                     @endforelse
                 </div>
 
-                {{-- Laravel Pagination Links --}}
-                <div class="pagination-container">
-                    {{ $guruList->links('pagination::bootstrap-5') }}
+                {{-- [BARU] Container untuk pesan 'empty state' yang dikontrol oleh JS --}}
+                <div id="emptyStateMessage">
+                    <i class="bi bi-person-x-fill"></i>
+                    <p id="emptyStateText"></p>
                 </div>
                 
+                {{-- Laravel Pagination Links --}}
+                @if ($guruList->hasPages())
+                <div class="pagination-container d-flex justify-content-center">
+                    {{ $guruList->links('pagination::bootstrap-5') }}
+                </div>
+                @endif
             </div>
         </div>
     </main>
@@ -331,81 +277,56 @@
     {{-- JavaScript dari CDN Bootstrap --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    {{-- Script untuk Fitur Pencarian dan Pengelolaan Pesan --}}
+    {{-- [BARU] Script yang disederhanakan dan lebih efisien --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
-            const guruListContainer = document.getElementById('guruListContainer');
-            
-            // Dapatkan semua item guru yang *saat ini* ada di halaman
-            // Penting: querySelectorAll akan mengambil hanya item di halaman ini
-            const guruItems = guruListContainer.querySelectorAll('.guru-item'); 
+            const guruItems = document.querySelectorAll('.guru-item');
+            const emptyStateMessage = document.getElementById('emptyStateMessage');
+            const emptyStateText = document.getElementById('emptyStateText');
+            const paginationContainer = document.querySelector('.pagination-container');
 
-            let noGuruFoundMessageElement = document.getElementById('noGuruFoundMessage');
+            function updateListVisibility() {
+                const filter = searchInput.value.toLowerCase().trim();
+                let visibleCount = 0;
 
-            // Fungsi untuk melakukan filter pada item yang TERLIHAT di halaman saat ini
-            function filterGuruList() {
-                const filter = searchInput.value.toLowerCase();
-                let foundItemsOnCurrentPage = 0;
-
-                guruItems.forEach(function(item) {
+                guruItems.forEach(item => {
                     const namaGuru = item.querySelector('.guru-nama').textContent.toLowerCase();
-                    if (namaGuru.includes(filter)) {
-                        item.style.display = 'flex'; // Tampilkan
-                        foundItemsOnCurrentPage++;
-                    } else {
-                        item.style.display = 'none'; // Sembunyikan
+                    const isVisible = namaGuru.includes(filter);
+                    item.style.display = isVisible ? 'flex' : 'none';
+                    if (isVisible) {
+                        visibleCount++;
                     }
                 });
 
-                // Mengelola visibilitas pesan "Tidak ada data guru"
-                // Ini akan muncul jika tidak ada hasil pencarian di halaman saat ini
-                if (noGuruFoundMessageElement) { 
-                    if (foundItemsOnCurrentPage === 0) {
-                        noGuruFoundMessageElement.style.display = 'block';
+                // Sembunyikan/Tampilkan pagination berdasarkan hasil filter
+                if (paginationContainer) {
+                    paginationContainer.style.display = filter ? 'none' : 'flex';
+                }
+
+                // Logika untuk menampilkan pesan 'empty state'
+                if (visibleCount === 0) {
+                    if (guruItems.length === 0) {
+                        // Kondisi jika dari awal memang tidak ada guru sama sekali
+                        emptyStateText.textContent = 'Tidak ada data guru yang tersedia saat ini.';
                     } else {
-                        noGuruFoundMessageElement.style.display = 'none';
+                        // Kondisi jika tidak ada hasil dari pencarian
+                        emptyStateText.textContent = 'Tidak ada guru yang cocok dengan pencarian Anda.';
                     }
-                } else { // Jika elemen pesan ini TIDAK ada (karena ada guru di awal)
-                    // Kita perlu membuat pesan jika tidak ada guru yang cocok
-                    // dan search input TIDAK kosong.
-                    if (foundItemsOnCurrentPage === 0 && filter !== '') {
-                        // Jika belum ada pesan, buat yang baru
-                        if (!document.getElementById('noSearchResultsMessage')) {
-                            const newNoResultsDiv = document.createElement('div');
-                            newNoResultsDiv.id = 'noSearchResultsMessage';
-                            newNoResultsDiv.className = 'no-guru-message'; // Gunakan kelas styling yang sama
-                            newNoResultsDiv.innerHTML = `
-                                <i class="bi bi-person-x-fill"></i>
-                                <p class="mt-3 text-muted">Tidak ada guru yang cocok dengan pencarian Anda.</p>
-                            `;
-                            guruListContainer.appendChild(newNoResultsDiv);
-                            noGuruFoundMessageElement = newNoResultsDiv; // Update referensi
-                        }
-                        noGuruFoundMessageElement.style.display = 'block';
-                    } else if (document.getElementById('noSearchResultsMessage')) {
-                        // Sembunyikan pesan jika sudah ada dan ada hasil
-                        document.getElementById('noSearchResultsMessage').style.display = 'none';
-                    }
+                    emptyStateMessage.style.display = 'block';
+                } else {
+                    emptyStateMessage.style.display = 'none';
                 }
             }
 
-            // Panggil fungsi filter saat halaman dimuat (untuk inisialisasi awal)
-            filterGuruList();
-
-            // Panggil fungsi filter setiap kali pengguna mengetik
-            searchInput.addEventListener('keyup', filterGuruList);
-
-            // Optional: Hapus pesan pencarian jika input dikosongkan
-            searchInput.addEventListener('input', function() {
-                if (this.value === '') {
-                    filterGuruList(); // Re-run filter to show all on current page
-                    if (document.getElementById('noSearchResultsMessage')) {
-                        document.getElementById('noSearchResultsMessage').style.display = 'none';
-                    }
-                }
-            });
+            // Panggil fungsi saat ada input di search box
+            searchInput.addEventListener('keyup', updateListVisibility);
+            
+            // Panggil fungsi saat halaman dimuat untuk menangani kasus daftar kosong dari awal
+            updateListVisibility(); 
         });
     </script>
 </body>
+</html>
+```</body>
 </html>
