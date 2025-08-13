@@ -6,14 +6,78 @@ use App\Http\Controllers\Controller;
 use App\Models\Kuis;
 use App\Models\Tugas;
 use App\Models\PengumpulanTugas;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class SiswaKuisController extends Controller
 {
+
+    public function showProfil()
+{
+    // [ALTERNATIF] Ambil user dan relasi 'profile' dalam satu query
+    $user = User::with('profile')->find(Auth::id());
+
+    // Jika user tidak ditemukan (meskipun jarang terjadi jika sudah login), arahkan ke halaman login
+    if (!$user) {
+        return redirect()->route('login')->with('sweet_error', 'Sesi tidak valid, silakan login kembali.');
+    }
+    
+    return view('siswa.profil', compact('user'));
+}
+    /**
+     * Memperbarui data profil siswa.
+     */
+   public function updateProfil(Request $request)
+{
+    // [PERBAIKAN 1] Ambil user dari model User secara langsung.
+    // Ini memastikan variabel $user dikenali sebagai instance Eloquent Model oleh editor.
+    $user = User::find(Auth::id());
+
+    // Validasi input form (tetap sama)
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        'alamat' => 'nullable|string|max:255',
+        'no_telepon' => 'nullable|string|max:15',
+        'tanggal_lahir' => 'nullable|date',
+        'password' => ['nullable', 'confirmed', Password::min(8)],
+        'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    // [PERBAIKAN 2] Menggunakan metode update() yang lebih ringkas.
+    $userData = $request->only(['nama', 'email']);
+    if ($request->filled('password')) {
+        $userData['password'] = Hash::make($request->password);
+    }
+    $user->update($userData);
+
+    // [PERBAIKAN 3] Logika untuk data profil dan foto disederhanakan.
+    $profileData = $request->only(['alamat', 'no_telepon', 'tanggal_lahir']);
+
+    if ($request->hasFile('foto_profil')) {
+        // Hapus foto lama jika ada
+        if ($user->profile && $user->profile->foto_profil) {
+            Storage::disk('public')->delete($user->profile->foto_profil);
+        }
+        // Simpan foto baru dan tambahkan path ke data profil
+        $profileData['foto_profil'] = $request->file('foto_profil')->store('foto_profil', 'public');
+    }
+
+    // [PERBAIKAN 4] Metode updateOrCreate tetap cara terbaik untuk tabel profile.
+    $user->profile()->updateOrCreate(['user_id' => $user->id], $profileData);
+
+    return redirect()->route('siswa.profil.show')
+        ->with('sweet_success', 'Profil Anda berhasil diperbarui!');
+}
+
+
         private function fisherYatesShuffle($items)
     {
         // Konversi ke array jika input adalah Collection

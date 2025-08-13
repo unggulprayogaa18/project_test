@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\KelasController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\MataPelajaranAdminController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Guru\AbsensiController;
 use App\Http\Controllers\Guru\BuatKuisController;
@@ -87,10 +89,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/halaman_matapelajaran', [AdminController::class, 'hal_matapelajaran'])->name('hal_matapelajaran');
     Route::resource('users', ControllersUserController::class);
     Route::resource('kelas', KelasController::class);
-    Route::resource('mata-pelajaran', MataPelajaranController::class);
+    Route::resource('mata-pelajaran-admin', MataPelajaranAdminController::class);
     Route::resource('materis', App\Http\Controllers\Admin\MateriController::class);
-    Route::get('/laporan/pengguna', [AdminController::class, 'laporanPengguna'])->name('laporan.pengguna');
-
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    // Rute untuk AJAX mengambil data siswa
+    Route::get('/laporan/get-siswa', [LaporanController::class, 'getSiswaByKelas'])->name('laporan.getSiswa');
 });
 
 
@@ -147,6 +150,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::put('/updateProfil', [SiswaController::class, 'updateProfil'])->name('profil.update');
     Route::get('/kuis/{kuis}/kerjakan', [SiswaKuisController::class, 'kerjakanKuis'])->name('kuis.kerjakan');
     Route::post('/kuis/{kuis}/simpan', [SiswaKuisController::class, 'simpanJawaban'])->name('kuis.simpan');
+
+     Route::get('/profil', [SiswaController::class, 'showProfil'])->name('profil.show');
+    Route::put('/profil', [SiswaController::class, 'updateProfil'])->name('profil.update');
 });
 
 

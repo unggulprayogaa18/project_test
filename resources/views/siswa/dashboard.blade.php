@@ -147,6 +147,7 @@
                 <li class="nav-item"><a href="{{ route('siswa.kelas.index') }}"
                         class="nav-link {{ request()->routeIs('siswa.kelas.*') ? 'active' : '' }}"><i
                             class="bi bi-people-fill me-2"></i>Kelas Saya</a></li>
+              
             </ul>
             <hr>
             <div class="dropdown">
@@ -158,6 +159,9 @@
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
                     <li>
                         <hr class="dropdown-divider">
+                        <a class="dropdown-item" href="{{ route('siswa.profil.show') }}">
+                                <i class="bi bi-person-fill-gear me-2"></i>Profil Saya
+                            </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{ route('logout') }}"

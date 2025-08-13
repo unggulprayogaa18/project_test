@@ -108,8 +108,8 @@
                             <i class="bi bi-file-earmark-bar-graph-fill"></i><span>Laporan</span>
                         </a>
                         <div class="collapse" id="submenu-laporan">
-                             <ul class="nav flex-column sidebar-submenu">
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.laporan.pengguna') }}">Laporan Pengguna</a></li>
+                             <ul class="nav flex-column sidebar-submenu">   
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.laporan.index') }}">Raport Siswa</a></li>
                              </ul>
                         </div>
                     </li>

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MataPelajaran;
 use App\Models\Tugas;
 use App\Models\Materi;
-use App\Models\Kuis; // Pastikan model Kuis di-import
+use App\Models\Kuis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -19,37 +19,35 @@ class TugasController extends Controller
         $search = $request->input('search');
         $guruId = Auth::id();
 
-        // Ambil semua ID mata pelajaran yang diajar oleh guru ini
         $mapelIds = DB::table('kelas_mata_pelajaran')
             ->where('guru_id', $guruId)
             ->pluck('mata_pelajaran_id')
             ->unique()
             ->toArray();
 
-        // Query tugas-tugas berdasarkan mata pelajaran yang diajar oleh guru
         $tugasQuery = Tugas::whereIn('mata_pelajaran_id', $mapelIds)
-            ->with(['mataPelajaran', 'kuis', 'materi']); // Eager load relationships
+            ->with(['mataPelajaran', 'kuis', 'materi']);
 
         if ($search) {
             $tugasQuery->where('judul', 'like', '%' . $search . '%');
         }
 
         $tugas = $tugasQuery->latest()->paginate(10);
-
-        // Ambil daftar mata pelajaran yang diajar untuk dropdown/modal
+        
         $mataPelajaranList = MataPelajaran::whereIn('id', $mapelIds)->orderBy('nama_mapel')->get();
         
-        // Ambil daftar kuis yang dibuat oleh guru yang bersangkutan
-        $kuisList = Kuis::where('guru_id', $guruId)->orderBy('judul_kuis')->get();
+        // [PERBAIKAN 1] Ambil ID kuis yang sudah terpakai
+        $usedKuisIds = Tugas::whereNotNull('kuis_id')->pluck('kuis_id');
         
-        // Materi list is not passed directly, it will be fetched via AJAX.
+        // Ambil daftar kuis yang dibuat guru, KECUALI yang sudah terpakai
+        $kuisList = Kuis::where('guru_id', $guruId)
+                        ->whereNotIn('id', $usedKuisIds)
+                        ->orderBy('judul_kuis')
+                        ->get();
 
         return view('guru.hal_tugas', compact('tugas', 'mataPelajaranList', 'kuisList'));
     }
 
-    /**
-     * Fetch materials based on the selected subject ID.
-     */
     public function getMateriByMapel(Request $request)
     {
         $mapelId = $request->input('mata_pelajaran_id');
@@ -57,9 +55,14 @@ class TugasController extends Controller
             return response()->json([]);
         }
 
+        // [PERBAIKAN 2] Ambil ID materi yang sudah terpakai
+        $usedMateriIds = Tugas::whereNotNull('materi_id')->pluck('materi_id');
+
+        // Ambil materi berdasarkan mapel, KECUALI yang sudah terpakai
         $materi = Materi::where('mata_pelajaran_id', $mapelId)
-                            ->orderBy('judul')
-                            ->get(['id', 'judul']);
+                        ->whereNotIn('id', $usedMateriIds)
+                        ->orderBy('judul')
+                        ->get(['id', 'judul']);
 
         return response()->json($materi);
     }
@@ -71,9 +74,13 @@ class TugasController extends Controller
             'deskripsi' => 'nullable|string',
             'batas_waktu' => 'required|date',
             'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
-            'materi_id' => 'nullable|exists:materis,id',
-            // [FIX] Menggunakan nama tabel yang benar: 'kuis_tabel'
-            'kuis_id' => 'nullable|exists:kuis_tabel,id',
+            // Validasi unik: pastikan materi_id belum ada di tabel tugas
+            'materi_id' => 'nullable|exists:materis,id|unique:tugas,materi_id',
+            // Validasi unik: pastikan kuis_id belum ada di tabel tugas
+            'kuis_id' => 'nullable|exists:kuis_tabel,id|unique:tugas,kuis_id',
+        ], [
+            'materi_id.unique' => 'Materi ini sudah terhubung dengan tugas lain.',
+            'kuis_id.unique' => 'Kuis ini sudah terhubung dengan tugas lain.',
         ]);
 
         if ($validator->fails()) {
@@ -82,7 +89,6 @@ class TugasController extends Controller
                 ->withInput();
         }
 
-        // Validasi otorisasi: apakah guru ini mengajar mata pelajaran tersebut
         $guruMapelIds = DB::table('kelas_mata_pelajaran')
             ->where('guru_id', Auth::id())
             ->pluck('mata_pelajaran_id')
@@ -101,14 +107,19 @@ class TugasController extends Controller
 
     public function update(Request $request, $id)
     {
+        $tugas = Tugas::findOrFail($id);
+        
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'batas_waktu' => 'required|date',
             'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
-            'materi_id' => 'nullable|exists:materis,id',
-            // [FIX] Menggunakan nama tabel yang benar: 'kuis_tabel'
-            'kuis_id' => 'nullable|exists:kuis_tabel,id',
+            // Validasi unik, abaikan tugas yang sedang diedit
+            'materi_id' => 'nullable|exists:materis,id|unique:tugas,materi_id,' . $tugas->id,
+            'kuis_id' => 'nullable|exists:kuis_tabel,id|unique:tugas,kuis_id,' . $tugas->id,
+        ], [
+            'materi_id.unique' => 'Materi ini sudah terhubung dengan tugas lain.',
+            'kuis_id.unique' => 'Kuis ini sudah terhubung dengan tugas lain.',
         ]);
 
         if ($validator->fails()) {
@@ -117,7 +128,6 @@ class TugasController extends Controller
                 ->withInput();
         }
 
-        $tugas = Tugas::findOrFail($id);
         $guruMapelIds = DB::table('kelas_mata_pelajaran')
             ->where('guru_id', Auth::id())
             ->pluck('mata_pelajaran_id')
@@ -137,6 +147,7 @@ class TugasController extends Controller
     public function destroy($id)
     {
         $tugas = Tugas::findOrFail($id);
+        
         $guruMapelIds = DB::table('kelas_mata_pelajaran')
             ->where('guru_id', Auth::id())
             ->pluck('mata_pelajaran_id')

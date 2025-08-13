@@ -4,64 +4,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kelola Tugas - SMK Otista Bandung</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
-        /* THEME: Menggunakan tema biru Otista yang konsisten */
         :root {
             --biru-otista: #0A2B7A;
+            --putih: #ffffff;
+            --latar-utama: #f4f7fc;
+            --teks-utama: #343a40;
+            --teks-sekunder: #6c757d;
+            --border-color: #e9ecef;
+            --hover-bg: #eef2ff;
+            --sidebar-width: 260px;
             --merah-menyala: #F20000;
             --kuning-pucat: #FDEEAA;
-            --putih: #FFFFFF;
-            --hitam: #000000;
-            --latar-utama: #f8f9fa;
-            --teks-utama: #212529;
-            --teks-sekunder: #6c757d;
-            --border-color: #dee2e6;
-            --hover-bg: #f1f3f5;
         }
 
         body {
             background-color: var(--latar-utama);
-            color: var(--hitam);
+            color: var(--teks-utama);
             font-family: 'Poppins', sans-serif;
         }
 
-        .navbar {
-            background-color: var(--putih);
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .navbar-brand span {
+        #sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background-color: var(--putih);
+            border-right: 1px solid var(--border-color);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-header span {
             font-weight: 600;
             color: var(--teks-utama);
         }
 
-        .navbar-nav .nav-link {
-            color: var(--teks-sekunder);
+        .sidebar-menu {
+            padding: 1rem 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1.5rem;
+            font-size: 1rem;
             font-weight: 500;
+            color: var(--teks-sekunder);
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease;
         }
 
-        .navbar-nav .nav-link:hover {
+        .sidebar-menu .nav-link i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 25px;
+            text-align: center;
+        }
+        
+        .sidebar-menu .nav-link:hover {
             color: var(--biru-otista);
+            background-color: var(--hover-bg);
         }
-
-        .navbar-nav .nav-link.active {
+        
+        .sidebar-menu .nav-link.active {
             color: var(--biru-otista);
-            font-weight: 700;
+            background-color: var(--hover-bg);
+            border-left-color: var(--biru-otista);
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .profile-dropdown .dropdown-toggle {
+            color: var(--teks-sekunder);
+            text-decoration: none;
+        }
+        
+        #content {
+            flex-grow: 1;
+            padding: 1.5rem 2.5rem;
+            overflow-y: auto;
         }
 
-        .main-content {
-            padding: 2.5rem;
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-toggler {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--teks-sekunder);
+            display: none;
         }
 
         .content-card {
@@ -78,23 +139,23 @@
             padding: 1.5rem;
         }
 
-        /* STYLE: Menggunakan style tabel kustom yang sama */
-        .table-custom thead th {
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
+        .table-custom thead {
             background-color: var(--biru-otista);
             color: var(--putih);
         }
 
+        .table-custom th,
         .table-custom td {
-            padding-top: 1rem;
-            padding-bottom: 1rem;
+            vertical-align: middle;
+            padding: 1rem;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: var(--hover-bg);
         }
 
         .item-judul {
             font-weight: 500;
-            color: var(--teks-utama);
         }
 
         .badge-mapel {
@@ -103,7 +164,7 @@
             font-weight: 500;
             padding: 0.4em 0.7em;
         }
-
+        
         .deadline-info {
             font-size: 0.9em;
             color: var(--teks-sekunder);
@@ -114,7 +175,7 @@
             gap: 0.5rem;
             justify-content: center;
         }
-
+        
         .modal-header {
             background-color: var(--biru-otista);
             color: var(--putih);
@@ -124,291 +185,239 @@
             filter: invert(1) brightness(2);
         }
 
-        .btn-primary {
-            background-color: var(--biru-otista);
-            border-color: var(--biru-otista);
-        }
-
-        .btn-primary:hover {
-            background-color: #082261;
-            border-color: #082261;
-        }
-
-        .btn-edit {
-            background-color: #ffc107;
-            color: var(--hitam);
-            border: none;
-        }
-
-        .btn-danger {
-            background-color: var(--merah-menyala);
-            border-color: var(--merah-menyala);
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: var(--biru-otista);
-            border-color: var(--biru-otista);
-        }
-
-        .pagination .page-link {
-            color: var(--biru-otista);
-        }
-
-        .profile-dropdown .dropdown-toggle,
-        .navbar-nav .nav-link {
-            color: var(--teks-sekunder);
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        /* =================================
-            OFFCANVAS (SIDEBAR MOBILE)
-        ==================================== */
-        .offcanvas {
-            background-color: var(--putih);
-        }
-
-        .offcanvas-header {
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .offcanvas-title {
-            color: var(--biru-otista);
-            font-weight: 600;
-        }
-
-        .offcanvas-body .nav-link {
-            color: var(--teks-utama);
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .offcanvas-body .nav-link.active,
-        .offcanvas-body .nav-link:hover {
-            background-color: var(--biru-otista);
-            color: var(--putih);
-        }
-
-        .offcanvas-body .nav-link:not(.active):hover {
-            background-color: var(--hover-bg);
-            color: var(--biru-otista);
+        @media (max-width: 768px) {
+            #sidebar {
+                margin-left: -var(--sidebar-width);
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                z-index: 1045;
+            }
+            #sidebar.active {
+                margin-left: 0;
+            }
+            #content {
+                width: 100%;
+                padding: 1.5rem;
+            }
+            .sidebar-toggler {
+                display: block;
+            }
         }
     </style>
 </head>
 
 <body>
-
-    <nav class="navbar navbar-expand-md">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{{ asset('images/bg.png') }}" alt="Logo Sekolah" width="50" class="me-3">
-                <span class="fs-5 d-none d-sm-inline">SMKS Otto Iskandar Dinata Bandung</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-                aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar"
-                aria-labelledby="offcanvasNavbarLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu Guru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body">
-                    <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('guru.dashboard') }}"><i
-                                    class="bi bi-house-door-fill me-2"></i>Beranda</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('guru.mata-pelajaran.index') }}" class="nav-link">
-                                <i class="bi bi-journal-bookmark-fill me-2"></i>Mata Pelajaran
-                            </a>
-                        </li>
-                        {{-- <li class="nav-item">
-                            <a class="nav-link" href="{{ route('guru.materi.index') }}"><i
-                                    class="bi bi-file-earmark-text-fill me-2"></i>Materi</a>
-                        </li> --}}
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{{ route('guru.tugas.index') }}"><i
-                                    class="bi bi-card-checklist me-2"></i>Tugas Siswa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('guru.buatkuis.index') }}"><i
-                                    class="bi bi-patch-check-fill me-2"></i>Kuis</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('guru.nilai.index') ? 'active' : '' }}"
-                                href="{{ route('guru.nilai.index') }}"><i class="bi bi-collection-fill me-2"></i>Kelola
-                                Nilai</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('guru.hal_absensi') }}"><i
-                                    class="bi bi-clipboard-check-fill me-2"></i>Absensi</a>
-                        </li> <li class="nav-item">
-                            <a class="nav-link" href="{{ route('guru.chat.index') }}"><i
-                                    class="bi bi-chat-left-dots-fill me-2"></i>Konsultasi Ortu</a>
-                        </li>
-                    </ul>
-                </div>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ asset('images/bg.png') }}" alt="Logo Sekolah" width="40" class="me-3">
+                <span class="fs-5">Guru Panel</span>
             </div>
-            <div class="d-none d-md-flex align-items-center">
-             
-                <div class="dropdown profile-dropdown">
-                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <strong>{{ Auth::user()->nama ?? 'Guru Hebat' }}</strong>
-                        <i class="bi bi-person-circle ms-2 fs-4"></i>
+            <ul class="nav flex-column sidebar-menu">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('guru.dashboard') }}">
+                        <i class="bi bi-house-door-fill"></i>Beranda
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-light text-small shadow dropdown-menu-end">
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('guru.mata-pelajaran.index') }}" class="nav-link">
+                        <i class="bi bi-journal-bookmark-fill"></i>Mata Pelajaran
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ route('guru.tugas.index') }}">
+                        <i class="bi bi-card-checklist"></i>Tugas Siswa
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('guru.buatkuis.index') }}">
+                        <i class="bi bi-patch-check-fill"></i>Kuis
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('guru.nilai.index') }}">
+                        <i class="bi bi-collection-fill"></i>Kelola Nilai
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('guru.absensi.index') }}">
+                        <i class="bi bi-clipboard-check-fill"></i>Absensi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{{ route('guru.chat.index') }}">
+                        <i class="bi bi-chat-left-dots-fill"></i>Konsultasi Ortu
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="dropdown profile-dropdown">
+                    <a href="#" class="d-flex w-100 align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle me-2 fs-2"></i>
+                        <div>
+                            <strong class="d-block">{{ Auth::user()->nama ?? 'Guru Hebat' }}</strong>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow w-100">
+                        <li><hr class="dropdown-divider"></li>
                         <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                         <li> <a class="dropdown-item" href="{{ route('logout') }}"
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Keluar</a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf
-                            </form>
+                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
                         </li>
                     </ul>
                 </div>
             </div>
-        </div>
-    </nav>
-
-    <main class="main-content">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('guru.dashboard') }}">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Kelola Tugas</li>
-            </ol>
         </nav>
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        <div id="content">
+            <header class="topbar">
+                <button type="button" id="sidebarCollapse" class="sidebar-toggler">
+                    <i class="bi bi-list"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('guru.dashboard') }}">Beranda</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Kelola Tugas</li>
+                    </ol>
+                </nav>
+            </header>
 
-        <div class="card content-card">
-            <div class="card-header">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <h3 class="mb-3 mb-md-0 fw-bold">Daftar Tugas Siswa</h3>
-                    <div class="d-flex w-100 w-md-auto">
-                        <form class="d-flex me-2 flex-grow-1" role="search" method="GET"
-                            action="{{ route('guru.tugas.index') }}">
-                            <input class="form-control" type="search" placeholder="Cari tugas..." aria-label="Search"
-                                name="search" value="{{ request('search') }}">
-                        </form>
-                        <button class="btn btn-primary text-nowrap" data-bs-toggle="modal"
-                            data-bs-target="#addTugasModal">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Tugas
-                        </button>
+            <main>
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                </div>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 table-custom">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="ps-4" style="width: 5%;">#</th>
-                                <th scope="col" style="width: 30%;">Tugas</th>
-                                <th scope="col" style="width: 20%;">Batas Waktu</th>
-                                <th scope="col" style="width: 20%;">Terhubung Ke</th>
-                                <th scope="col" class="text-center pe-4" style="width: 15%;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($tugas as $index => $item)
-                                <tr>
-                                    <td class="ps-4 fw-bold">{{ $tugas->firstItem() + $index }}</td>
-                                    <td>
-                                        <div class="item-judul">{{ $item->judul }}</div>
-                                        <div class="mt-1">
-                                            <span
-                                                class="badge rounded-pill badge-mapel">{{ $item->mataPelajaran->nama_mapel ?? 'N/A' }}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if (\Carbon\Carbon::now()->gt($item->batas_waktu))
-                                            <span class="badge rounded-pill text-bg-danger">Telah Berakhir</span>
-                                        @else
-                                            <span class="badge rounded-pill text-bg-success">Aktif</span>
-                                        @endif
-                                        <div class="deadline-info mt-1">
-                                            <i class="bi bi-calendar-event"></i>
-                                            {{ \Carbon\Carbon::parse($item->batas_waktu)->isoFormat('dddd, D MMMM Y') }}
-                                            <br>
-                                            <i class="bi bi-clock"></i> Pukul
-                                            {{ \Carbon\Carbon::parse($item->batas_waktu)->format('H:i') }} WIB
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if($item->materi)
-                                            <span class="badge rounded-pill text-bg-primary mb-1 d-block">
-                                                <i class="bi bi-file-earmark-text-fill me-1"></i>
-                                                Materi: {{ Str::limit($item->materi->judul, 15) }}
-                                            </span>
-                                        @endif
-                                        @if($item->kuis)
-                                            <span class="badge rounded-pill text-bg-info d-block">
-                                                <i class="bi bi-patch-check-fill me-1"></i>
-                                                Kuis: {{ Str::limit($item->kuis->judul_kuis, 15) }}
-                                            </span>
-                                        @else
-                                            @if(!$item->materi)
-                                                <span class="badge text-bg-secondary">Tidak ada</span>
-                                            @endif
-                                        @endif
-                                    </td>
-                                    <td class="pe-4">
-                                        <div class="action-buttons">
-                                            <button class="btn btn-sm btn-edit" data-bs-toggle="modal"
-                                                data-bs-target="#editTugasModal" data-id="{{ $item->id }}"
-                                                data-judul="{{ $item->judul }}" data-deskripsi="{{ $item->deskripsi }}"
-                                                data-bataswaktu="{{ $item->batas_waktu }}"
-                                                data-kuisid="{{ $item->kuis_id }}" data-materiid="{{ $item->materi_id }}"
-                                                data-matapelajaranid="{{ $item->mata_pelajaran_id }}">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <form action="{{ route('guru.tugas.destroy', $item->id) }}" method="POST"
-                                                class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus tugas ini?')">
-                                                    <i class="bi bi-trash3-fill"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">Tidak ada tugas ditemukan.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card-footer bg-transparent">
-                <div class="d-flex justify-content-center">
-                    {{ $tugas->links() }}
-                </div>
-            </div>
-        </div>
-    </main>
+                @endif
+                @if ($errors->any())
+                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
 
-    <!-- Add Task Modal -->
+                <div class="card content-card">
+                    <div class="card-header">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            <h3 class="mb-3 mb-md-0 fw-bold">Daftar Tugas Siswa</h3>
+                            <div class="d-flex w-100 w-md-auto">
+                                <form class="d-flex me-2 flex-grow-1" role="search" method="GET" action="{{ route('guru.tugas.index') }}">
+                                    <input class="form-control" type="search" placeholder="Cari tugas..." aria-label="Search" name="search" value="{{ request('search') }}">
+                                </form>
+                                <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#addTugasModal">
+                                    <i class="bi bi-plus-circle me-1"></i> Tambah Tugas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 table-custom">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="ps-4" style="width: 5%;">#</th>
+                                        <th scope="col" style="width: 30%;">Tugas</th>
+                                        <th scope="col" style="width: 20%;">Batas Waktu</th>
+                                        <th scope="col" style="width: 20%;">Terhubung Ke</th>
+                                        <th scope="col" class="text-center pe-4" style="width: 15%;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($tugas as $index => $item)
+                                        <tr>
+                                            <td class="ps-4 fw-bold">{{ $tugas->firstItem() + $index }}</td>
+                                            <td>
+                                                <div class="item-judul">{{ $item->judul }}</div>
+                                                <div class="mt-1">
+                                                    <span class="badge rounded-pill badge-mapel">{{ $item->mataPelajaran->nama_mapel ?? 'N/A' }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (\Carbon\Carbon::now()->gt($item->batas_waktu))
+                                                    <span class="badge rounded-pill text-bg-danger">Telah Berakhir</span>
+                                                @else
+                                                    <span class="badge rounded-pill text-bg-success">Aktif</span>
+                                                @endif
+                                                <div class="deadline-info mt-1">
+                                                    <i class="bi bi-calendar-event"></i>
+                                                    {{ \Carbon\Carbon::parse($item->batas_waktu)->isoFormat('dddd, D MMMM YYYY') }}
+                                                    <br>
+                                                    <i class="bi bi-clock"></i> Pukul
+                                                    {{ \Carbon\Carbon::parse($item->batas_waktu)->format('H:i') }} WIB
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if($item->materi)
+                                                    <span class="badge rounded-pill text-bg-primary mb-1 d-block">
+                                                        <i class="bi bi-file-earmark-text-fill me-1"></i>
+                                                        Materi: {{ Str::limit($item->materi->judul, 15) }}
+                                                    </span>
+                                                @endif
+                                                @if($item->kuis)
+                                                    <span class="badge rounded-pill text-bg-info d-block">
+                                                        <i class="bi bi-patch-check-fill me-1"></i>
+                                                        Kuis: {{ Str::limit($item->kuis->judul_kuis, 15) }}
+                                                    </span>
+                                                @elseif(!$item->materi && !$item->kuis)
+                                                    <span class="badge text-bg-secondary">Tidak Terhubung</span>
+                                                @endif
+                                            </td>
+                                            <td class="pe-4">
+                                                <div class="action-buttons">
+                                                    <button class="btn btn-sm btn-edit" data-bs-toggle="modal"
+                                                        data-bs-target="#editTugasModal" data-id="{{ $item->id }}"
+                                                        data-judul="{{ $item->judul }}" data-deskripsi="{{ $item->deskripsi }}"
+                                                        data-bataswaktu="{{ $item->batas_waktu }}"
+                                                        data-kuisid="{{ $item->kuis_id }}" data-materiid="{{ $item->materi_id }}"
+                                                        data-matapelajaranid="{{ $item->mata_pelajaran_id }}">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                    <form action="{{ route('guru.tugas.destroy', $item->id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus tugas ini?')">
+                                                            <i class="bi bi-trash3-fill"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5">
+                                                <div class="text-center py-5">
+                                                    <i class="bi bi-journal-x" style="font-size: 4rem; color: #ccc;"></i>
+                                                    <h4 class="mt-3">Belum Ada Tugas Dibuat</h4>
+                                                    <p class="text-muted">Klik tombol "Tambah Tugas" untuk membuat tugas baru.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @if($tugas->hasPages())
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-center">
+                            {{ $tugas->links() }}
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </main>
+        </div>
+    </div>
+
     <div class="modal fade" id="addTugasModal" tabindex="-1" aria-labelledby="addTugasModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -429,8 +438,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="addBatasWaktu" class="form-label">Batas Waktu</label>
-                            <input type="datetime-local" class="form-control" id="addBatasWaktu" name="batas_waktu"
-                                required>
+                            <input type="datetime-local" class="form-control" id="addBatasWaktu" name="batas_waktu" required>
                         </div>
                         <div class="mb-3">
                             <label for="addMataPelajaranId" class="form-label">Mata Pelajaran</label>
@@ -447,6 +455,7 @@
                                 <option value="">Pilih mata pelajaran dulu</option>
                             </select>
                         </div>
+                        {{-- [PERBAIKAN 1] Tambahkan blok if untuk pesan --}}
                         <div class="mb-3">
                             <label for="addKuisId" class="form-label">Kuis (Opsional)</label>
                             <select class="form-select" id="addKuisId" name="kuis_id">
@@ -455,6 +464,13 @@
                                     <option value="{{ $kuis->id }}">{{ $kuis->judul_kuis }}</option>
                                 @endforeach
                             </select>
+                            {{-- Pesan ini akan muncul jika tidak ada kuis yang tersedia --}}
+                            @if($kuisList->isEmpty())
+                                <div class="form-text text-warning mt-2">
+                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                    Semua kuis sudah terhubung. Anda bisa <a href="{{ route('guru.buatkuis.index') }}">buat kuis baru</a>.
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -465,8 +481,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Edit Task Modal -->
+    
     <div class="modal fade" id="editTugasModal" tabindex="-1" aria-labelledby="editTugasModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -478,7 +493,6 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-body">
-                        <input type="hidden" id="editTugasId" name="id">
                         <div class="mb-3">
                             <label for="editJudul" class="form-label">Judul Tugas</label>
                             <input type="text" class="form-control" id="editJudul" name="judul" required>
@@ -489,8 +503,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="editBatasWaktu" class="form-label">Batas Waktu</label>
-                            <input type="datetime-local" class="form-control" id="editBatasWaktu" name="batas_waktu"
-                                required>
+                            <input type="datetime-local" class="form-control" id="editBatasWaktu" name="batas_waktu" required>
                         </div>
                         <div class="mb-3">
                             <label for="editMataPelajaranId" class="form-label">Mata Pelajaran</label>
@@ -507,14 +520,17 @@
                                 <option value="">Pilih mata pelajaran dulu</option>
                             </select>
                         </div>
+                        {{-- [PERBAIKAN 2] Tambahkan blok if juga di modal edit --}}
                         <div class="mb-3">
                             <label for="editKuisId" class="form-label">Kuis (Opsional)</label>
                             <select class="form-select" id="editKuisId" name="kuis_id">
                                 <option value="">Tanpa Kuis</option>
-                                @foreach ($kuisList as $kuis)
-                                    <option value="{{ $kuis->id }}">{{ $kuis->judul_kuis }}</option>
-                                @endforeach
+                                {{-- Opsi kuis akan di-handle oleh JavaScript --}}
                             </select>
+                            <div id="edit-kuis-info" class="form-text text-warning mt-2 d-none">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                Semua kuis lain sudah terhubung. Anda bisa <a href="{{ route('guru.buatkuis.index') }}">buat kuis baru</a>.
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -529,89 +545,98 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const sidebarCollapse = document.getElementById('sidebarCollapse');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebarCollapse) {
+                sidebarCollapse.addEventListener('click', () => sidebar.classList.toggle('active'));
+            }
 
-            // --- Reusable function to fetch and populate materials ---
-            async function fetchAndPopulateMateri(mapelId, materiSelectElement, selectedMateriId = null) {
+            async function fetchAndPopulateMateri(mapelId, materiSelectEl, selectedMateriId = null) {
                 if (!mapelId) {
-                    materiSelectElement.innerHTML = '<option value="">Pilih mata pelajaran dulu</option>';
-                    materiSelectElement.disabled = true;
+                    materiSelectEl.innerHTML = '<option value="">Pilih mata pelajaran dulu</option>';
+                    materiSelectEl.disabled = true;
                     return;
                 }
-
-                materiSelectElement.disabled = true;
-                materiSelectElement.innerHTML = '<option value="">Memuat materi...</option>';
-
+                materiSelectEl.disabled = true;
+                materiSelectEl.innerHTML = '<option value="">Memuat materi...</option>';
                 try {
-                    const response = await fetch(`{{ route('guru.tugas.getMateriByMapel') }}?mata_pelajaran_id=${mapelId}`);
+                    const response = await fetch(`{{ route('guru.tugas.getMateriByMapel') }}?mata_pelajaran_id=${mapelId}&tugas_id=${materiSelectEl.dataset.tugasId || ''}`);
                     if (!response.ok) throw new Error('Network response was not ok');
-
                     const materis = await response.json();
-
-                    materiSelectElement.innerHTML = '<option value="">Tanpa Materi</option>'; // Default option
+                    materiSelectEl.innerHTML = '<option value="">Tanpa Materi</option>';
                     materis.forEach(materi => {
                         const option = new Option(materi.judul, materi.id);
-                        materiSelectElement.add(option);
+                        materiSelectEl.add(option);
                     });
-
                     if (selectedMateriId) {
-                        materiSelectElement.value = selectedMateriId;
+                        materiSelectEl.value = selectedMateriId;
                     }
-
-                    materiSelectElement.disabled = false;
+                    materiSelectEl.disabled = false;
                 } catch (error) {
-                    console.error('Error fetching materials:', error);
-                    materiSelectElement.innerHTML = '<option value="">Gagal memuat materi</option>';
-                    materiSelectElement.disabled = true;
+                    materiSelectEl.innerHTML = '<option value="">Gagal memuat materi</option>';
                 }
             }
 
             // --- Logic for Add Modal ---
             const addMapelSelect = document.getElementById('addMataPelajaranId');
-            const addMateriSelect = document.getElementById('addMateriId');
-
-            addMapelSelect.addEventListener('change', function () {
-                fetchAndPopulateMateri(this.value, addMateriSelect);
-            });
-
+            if(addMapelSelect) {
+                const addMateriSelect = document.getElementById('addMateriId');
+                addMapelSelect.addEventListener('change', () => fetchAndPopulateMateri(this.value, addMateriSelect));
+            }
 
             // --- Logic for Edit Modal ---
             const editTugasModal = document.getElementById('editTugasModal');
-            editTugasModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var id = button.getAttribute('data-id');
-                var judul = button.getAttribute('data-judul');
-                var deskripsi = button.getAttribute('data-deskripsi');
-                var batasWaktu = button.getAttribute('data-bataswaktu');
-                var mataPelajaranId = button.getAttribute('data-matapelajaranid');
-                var materiId = button.getAttribute('data-materiid');
-                var kuisId = button.getAttribute('data-kuisid');
+            if(editTugasModal) {
+                editTugasModal.addEventListener('show.bs.modal', async function (event) {
+                    const button = event.relatedTarget;
+                    const id = button.dataset.id;
+                    const { judul, deskripsi, bataswaktu, matapelajaranid, materiid, kuisid } = button.dataset;
+                    
+                    const form = editTugasModal.querySelector('#editTugasForm');
+                    form.action = `{{ url('guru/tugas') }}/${id}`;
+                    
+                    editTugasModal.querySelector('#editJudul').value = judul;
+                    editTugasModal.querySelector('#editDeskripsi').value = deskripsi;
+                    editTugasModal.querySelector('#editBatasWaktu').value = bataswaktu ? bataswaktu.replace(' ', 'T').substring(0, 16) : '';
+                    
+                    const modalMataPelajaranSelect = editTugasModal.querySelector('#editMataPelajaranId');
+                    modalMataPelajaranSelect.value = matapelajaranid;
 
-                var formattedBatasWaktu = batasWaktu ? batasWaktu.replace(' ', 'T').substring(0, 16) : '';
+                    const modalMateriSelect = editTugasModal.querySelector('#editMateriId');
+                    modalMateriSelect.dataset.tugasId = id; // Set tugas ID for fetching
+                    await fetchAndPopulateMateri(matapelajaranid, modalMateriSelect, materiid);
 
-                var modalJudulInput = editTugasModal.querySelector('#editJudul');
-                var modalDeskripsiInput = editTugasModal.querySelector('#editDeskripsi');
-                var modalBatasWaktuInput = editTugasModal.querySelector('#editBatasWaktu');
-                var modalMataPelajaranSelect = editTugasModal.querySelector('#editMataPelajaranId');
-                var modalMateriSelect = editTugasModal.querySelector('#editMateriId');
-                var modalKuisSelect = editTugasModal.querySelector('#editKuisId');
-                var form = editTugasModal.querySelector('#editTugasForm');
+                    // [PERBAIKAN 3] Logika untuk dropdown Kuis di modal EDIT
+                    const modalKuisSelect = editTugasModal.querySelector('#editKuisId');
+                    const kuisInfo = editTugasModal.querySelector('#edit-kuis-info');
+                    
+                    // Isi dropdown kuis dengan daftar yang belum terpakai
+                    modalKuisSelect.innerHTML = '<option value="">Tanpa Kuis</option>';
+                    @foreach ($kuisList as $kuis)
+                        modalKuisSelect.add(new Option("{{ $kuis->judul_kuis }}", "{{ $kuis->id }}"));
+                    @endforeach
 
-                modalJudulInput.value = judul;
-                modalDeskripsiInput.value = deskripsi;
-                modalBatasWaktuInput.value = formattedBatasWaktu;
-                modalMataPelajaranSelect.value = mataPelajaranId;
-                modalKuisSelect.value = kuisId || '';
-                form.action = '{{ url('guru/tugas') }}/' + id;
+                    // Jika tugas ini SUDAH punya kuis, tambahkan kuis tsb ke daftar agar bisa dipilih
+                    @if ($item->kuis)
+                        const currentKuis = { id: "{{ $item->kuis->id }}", judul: "{{ $item->kuis->judul_kuis }}" };
+                        // Cek jika kuis saat ini tidak ada di daftar (karena sudah terpakai)
+                        if (!modalKuisSelect.querySelector(`option[value="${currentKuis.id}"]`)) {
+                             modalKuisSelect.add(new Option(currentKuis.judul, currentKuis.id));
+                        }
+                    @endif
+                    
+                    modalKuisSelect.value = kuisid || '';
 
-                // Fetch materials for the selected subject when modal opens
-                fetchAndPopulateMateri(mataPelajaranId, modalMateriSelect, materiId);
+                    // Tampilkan pesan jika hanya ada opsi "Tanpa Kuis" dan kuis yang sedang diedit
+                    if (modalKuisSelect.options.length <= 2 && !kuisid) {
+                        kuisInfo.classList.remove('d-none');
+                    } else {
+                        kuisInfo.classList.add('d-none');
+                    }
 
-                // Add event listener for mapel change within the edit modal
-                modalMataPelajaranSelect.addEventListener('change', function () {
-                    fetchAndPopulateMateri(this.value, modalMateriSelect);
+                    modalMataPelajaranSelect.onchange = () => fetchAndPopulateMateri(modalMataPelajaranSelect.value, modalMateriSelect);
                 });
-            });
+            }
         });
     </script>
 </body>

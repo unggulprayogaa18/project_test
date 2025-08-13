@@ -123,7 +123,14 @@
                 <strong>{{ $user->nama ?? 'Siswa' }}</strong>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                <li><hr class="dropdown-divider"></li>
+                <li><hr class="dropdown-divider">
+                  <li>
+                    <a class="dropdown-item" href="{{ route('siswa.profil.show') }}">
+                        <i class="bi bi-person-fill-gear me-2"></i>Profil Saya
+                    </a>
+                </li>
+                </li>
+                
                 <li>
                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="bi bi-box-arrow-right me-2"></i>Keluar

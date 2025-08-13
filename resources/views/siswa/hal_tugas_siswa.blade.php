@@ -145,21 +145,30 @@
                             class="bi bi-people-fill me-2"></i>Kelas Saya</a></li>
             </ul>
             <hr>
-        <div class="dropdown">
-            <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle me-2 fs-4"></i>
-                <strong>{{ $user->nama ?? 'Siswa' }}</strong>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="bi bi-box-arrow-right me-2"></i>Keluar
-                    </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
-                </li>
-            </ul>
-        </div>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-2 fs-4"></i>
+                    <strong>{{ $user->nama ?? 'Siswa' }}</strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                    <li>
+                        <hr class="dropdown-divider">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('siswa.profil.show') }}">
+                            <i class="bi bi-person-fill-gear me-2"></i>Profil Saya
+                        </a>
+                    </li>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('logout') }}"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <!-- Main Content -->

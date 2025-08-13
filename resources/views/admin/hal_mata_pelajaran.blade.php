@@ -110,7 +110,7 @@
                         </a>
                         <div class="collapse" id="submenu-laporan">
                              <ul class="nav flex-column sidebar-submenu">
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.laporan.pengguna') }}">Laporan Pengguna</a></li>
+                                 <li class="nav-item"><a class="nav-link" href="{{ route('admin.laporan.index') }}">Raport Siswa</a></li>
                              </ul>
                         </div>
                     </li>
@@ -198,7 +198,7 @@
                                             <td class="text-center pe-4">
                                                 <div class="action-buttons">
                                                     <button type="button" class="btn btn-sm btn-warning" onclick="editMapel({{ $item }})"><i class="bi bi-pencil-square"></i></button>
-                                                    <form action="{{ route('admin.mata-pelajaran.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus mata pelajaran ini?');">
+                                                    <form action="{{ route('admin.mata-pelajaran-admin.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus mata pelajaran ini?');">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash3-fill"></i></button>
                                                     </form>
@@ -263,7 +263,7 @@
 
         function resetForm() {
             mapelForm.reset();
-            mapelForm.action = "{{ route('admin.mata-pelajaran.store') }}";
+            mapelForm.action = "{{ route('admin.mata-pelajaran-admin.store') }}";
             formMethod.value = 'POST';
             modalLabel.textContent = 'Tambah Mata Pelajaran';
             mapelModal.show();
@@ -271,7 +271,7 @@
 
         function editMapel(mapel) {
             mapelForm.reset();
-            mapelForm.action = `/admin/mata-pelajaran/${mapel.id}`;
+            mapelForm.action = `/admin/mata-pelajaran-admin/${mapel.id}`;
             formMethod.value = 'PUT';
             modalLabel.textContent = 'Edit Mata Pelajaran';
             document.getElementById('nama_mapel').value = mapel.nama_mapel;

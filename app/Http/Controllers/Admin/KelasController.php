@@ -10,9 +10,17 @@ use Illuminate\Validation\Rule;
 class KelasController extends Controller
 {
     /**
-     * Menampilkan halaman utama untuk mengelola kelas.
+     * [PERBAIKAN] Menambahkan method index() yang hilang.
+     * Method ini menampilkan halaman daftar kelas.
      */
- 
+    public function index()
+    {
+        // Mengambil semua data kelas, diurutkan dari yang terbaru, dengan pagination
+        $kelas = Kelas::latest()->paginate(10); 
+        
+        // Menampilkan view dan mengirimkan data kelas ke dalamnya
+        return view('admin.hal_kelas', compact('kelas'));
+    }
 
     /**
      * Menyimpan data kelas baru ke dalam database.
@@ -25,19 +33,16 @@ class KelasController extends Controller
                 'required',
                 'string',
                 'max:255',
-                // Pastikan kombinasi nama_kelas dan tahun_ajaran unik
                 Rule::unique('kelas')->where(function ($query) use ($request) {
                     return $query->where('tahun_ajaran', $request->tahun_ajaran);
                 }),
             ],
-            'tahun_ajaran' => 'required|string|regex:/^\d{4}\/\d{4}$/', // Format YYYY/YYYY
-            'tingkat' => 'required|string|max:5', // Contoh: X, XI, XII
+            'tahun_ajaran' => 'required|string|regex:/^\d{4}\/\d{4}$/',
+            'tingkat' => 'required|string|max:5',
         ]);
 
-        // Membuat record baru di tabel 'kelas'
-        Kelas::create($request->only('nama_kelas', 'tahun_ajaran', 'tingkat')); // Ambil semua field yang diperlukan
+        Kelas::create($request->only('nama_kelas', 'tahun_ajaran', 'tingkat'));
 
-        // Redirect kembali dengan pesan sukses
         return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil ditambahkan.');
     }
 
@@ -52,7 +57,6 @@ class KelasController extends Controller
                 'required',
                 'string',
                 'max:255',
-                // Pastikan kombinasi nama_kelas dan tahun_ajaran unik, kecuali untuk kelas yang sedang diupdate
                 Rule::unique('kelas')->ignore($kela->id)->where(function ($query) use ($request) {
                     return $query->where('tahun_ajaran', $request->tahun_ajaran);
                 }),
@@ -61,10 +65,8 @@ class KelasController extends Controller
             'tingkat' => 'required|string|max:5',
         ]);
 
-        // Update record kelas
         $kela->update($request->only('nama_kelas', 'tahun_ajaran', 'tingkat'));
 
-        // Redirect kembali dengan pesan sukses
         return redirect()->route('admin.kelas.index')->with('success', 'Data kelas berhasil diperbarui.');
     }
 
@@ -73,10 +75,8 @@ class KelasController extends Controller
      */
     public function destroy(Kelas $kela)
     {
-        // Hapus record kelas
         $kela->delete();
 
-        // Redirect kembali dengan pesan sukses
         return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil dihapus.');
     }
 }
